@@ -2,10 +2,12 @@
 
 /**
  * @file
- * Contains RestfulUnprocessableEntityException
+ * Contains Drupal\restful\Exception\RestfulUnprocessableEntityException
  */
 
-class RestfulUnprocessableEntityException extends Exception {
+namespace Drupal\restful\Exception;
+
+class RestfulUnprocessableEntityException extends \Exception {
 
   /**
    * Defines the HTTP error code.

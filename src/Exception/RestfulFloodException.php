@@ -2,8 +2,10 @@
 
 /**
  * @file
- * Contains RestfulFloodException
+ * Contains Drupal\restful\Exception\RestfulFloodException
  */
+
+namespace Drupal\restful\Exception;
 
 class RestfulFloodException extends RestfulException {
 

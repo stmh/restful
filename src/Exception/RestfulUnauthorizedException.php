@@ -2,10 +2,12 @@
 
 /**
  * @file
- * Contains RestfulUnauthorizedException.
+ * Contains Drupal\restful\Exception\RestfulUnauthorizedException.
  */
 
-class RestfulUnauthorizedException extends \RestfulException {
+namespace Drupal\restful\Exception;
+
+class RestfulUnauthorizedException extends RestfulException {
 
   /**
    * Defines the HTTP error code.

@@ -2,8 +2,9 @@
 
 /**
  * @file
- * Contains RestfulForbiddenException
+ * Contains Drupal\restful\Exception\RestfulForbiddenException
  */
+namespace Drupal\restful\Exception;
 
 class RestfulForbiddenException extends RestfulException {
 
