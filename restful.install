@@ -11,7 +11,8 @@
 function restful_schema() {
   $schema = array();
 
-  $schema['cache_restful'] = drupal_get_schema_unprocessed('system', 'cache');
+  // Disable the cache for now.
+//  $schema['cache_restful'] = drupal_get_schema_unprocessed('system', 'cache');
 
   // Rate limit entity base table.
   $schema['restful_rate_limit'] = array(
