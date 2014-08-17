@@ -11,6 +11,24 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
+/**
+ *  @ContentEntityType(
+ *    id = "rate_limit",
+ *    label = @Translation("Rate limit"),
+ *    bundle_label = @Translation("OG membership type"),
+ *    module = "restful",
+ *    base_table = "restful_rate_limit",
+ *    fieldable = TRUE,
+ *    bundle_entity_type = "og_membership_type",
+ *    entity_keys = {
+ *      "id" = "rlid",
+ *      "label" = "identifier",
+ *    },
+ *    bundle_keys = {
+ *      "bundle" = "type"
+ *    }
+ *  )
+ */
 class RestfulRateLimit extends ContentEntityBase {
 
   /**
