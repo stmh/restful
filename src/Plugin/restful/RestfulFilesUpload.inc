@@ -2,14 +2,37 @@
 
 /**
  * @file
- * Contains RestfulFilesUpload.
+ * Contains Drupal\restful\Plugin\Restful\RestfulFilesUpload.
  */
+namespace Drupal\restful\Plugin\Restful;
 
-namespace Drupal\restful\Base;
-
+use Drupal\restful\Base\RestfulAuthenticationManager;
+use Drupal\restful\Base\RestfulEntityBase;
+use Drupal\restful\Base\RestfulInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulUnauthorizedException;
 
+//if (variable_get('restful_file_upload', FALSE)) {
+//  $plugin = array(
+//    'authentication_optional' => variable_get('restful_file_upload_allow_anonymous_user', FALSE),
+//    'options' => array(),
+//  );
+//}
+
+/**
+ * Class fileUpload
+ *
+ * @Restful(
+ *  id = "file_upload",
+ *  api = "1.0",
+ *  label = @translation('File upload'),
+ *  description = @translation('A file upload wrapped with RESTful.'),
+ *  resource = "files",
+ *  entity_type = "file",
+ *  authentication_types = TRUE,
+ *  hook_menu = FALSE,
+ * )
+ */
 class RestfulFilesUpload extends RestfulEntityBase {
 
   /**
