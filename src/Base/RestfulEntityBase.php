@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\restful\Base;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulForbiddenException;
@@ -340,10 +341,10 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   Plugin definition.
    * @param RestfulAuthenticationManager $auth_manager
    *   (optional) Injected authentication manager.
-   * @param DrupalCacheInterface $cache_controller
+   * @param CacheBackendInterface $cache_controller
    *   (optional) Injected cache backend.
    */
-  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL) {
     $this->plugin = $plugin;
     $this->entityType = $plugin['entity_type'];
     $this->bundle = $plugin['bundle'];

@@ -1,4 +1,5 @@
 <?php
+use Drupal\restful\Base\RestfulRateLimitInterface;
 
 /**
  * @file

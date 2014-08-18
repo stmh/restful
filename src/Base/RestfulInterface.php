@@ -7,6 +7,8 @@
 
 namespace Drupal\restful\Base;
 
+use Drupal\Core\Cache\CacheBackendInterface;
+
 interface RestfulInterface {
 
   /**
@@ -34,10 +36,10 @@ interface RestfulInterface {
    *   The restful plugin object.
    * @param RestfulAuthenticationManager $auth_manager
    *   Injected authentication manager.
-   * @param DrupalCacheInterface $cache_controller
+   * @param CacheBackendInterface $cache_controller
    *   Injected cache controller.
    */
-  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL);
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL);
 
   /**
    * Entry point to process a request.

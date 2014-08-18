@@ -1,5 +1,6 @@
 <?php
 use Drupal\restful\Base\RestfulEntityBase;
+use Drupal\restful\Base\RestfulInterface;
 
 /**
  * @file
@@ -34,7 +35,7 @@ class RestfulUserLoginCookie extends RestfulEntityBase {
    */
   protected $controllers = array(
     '' => array(
-      \RestfulInterface::GET => 'loginAndRespondWithCookie',
+      RestfulInterface::GET => 'loginAndRespondWithCookie',
     ),
   );
 

@@ -1,4 +1,8 @@
 <?php
+use Drupal\restful\Base\RestfulAuthenticationBase;
+use Drupal\restful\Base\RestfulAuthenticationInterface;
+use Drupal\restful\Base\RestfulInterface;
+use Drupal\restful\Exception\RestfulFloodException;
 
 /**
  * @file
@@ -10,7 +14,7 @@ class RestfulAuthenticationBasic extends RestfulAuthenticationBase implements Re
   /**
    * {@inheritdoc}
    */
-  public function applies(array $request = array(), $method = \RestfulInterface::GET) {
+  public function applies(array $request = array(), $method = RestfulInterface::GET) {
     list($username, $password) = $this->getCredentials();
     return isset($username) && isset($password);
   }
@@ -20,7 +24,7 @@ class RestfulAuthenticationBasic extends RestfulAuthenticationBase implements Re
    *
    * @see user_login_authenticate_validate().
    */
-  public function authenticate(array $request = array(), $method = \RestfulInterface::GET) {
+  public function authenticate(array $request = array(), $method = RestfulInterface::GET) {
     list($username, $password) = $this->getCredentials();
 
     // Do not allow any login from the current user's IP if the limit has been

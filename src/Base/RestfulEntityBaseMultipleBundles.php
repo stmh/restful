@@ -7,6 +7,8 @@
 
 namespace Drupal\restful\Base;
 
+use Drupal\Core\Cache\CacheBackendInterface;
+
 class RestfulEntityBaseMultipleBundles extends RestfulEntityBase {
 
   /**
@@ -24,7 +26,7 @@ class RestfulEntityBaseMultipleBundles extends RestfulEntityBase {
     ),
   );
 
-  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL) {
     parent::__construct($plugin);
 
     if (!empty($plugin['bundles'])) {
