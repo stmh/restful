@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\restful\Controller;
+
 use Drupal\restful\Base\RestfulEntityBase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class Restful {
 
   CONST RESTFUL = "plugin.manager.restful.restful";
+  CONST AUTHENTICATION = "plugin.manager.restful.authentication";
+  CONST RATE_LIMIT = "plugin.manager.restful.rate_limit";
 
   /**
    * Get all restful plugins.
@@ -32,13 +35,7 @@ class Restful {
    * @endcode
    */
   public static function RestfulPlugins($plugin_name = NULL, $api = "1.0") {
-    $service = \Drupal::service(self::RESTFUL);
-
-    if ($plugin_name) {
-      return $service->createInstance($plugin_name . "-" . $api);
-    }
-
-    return $service->getDefinitions();
+    return self::GetPlugins(self::RESTFUL, $plugin_name, $api);
   }
 
   /**
@@ -54,6 +51,7 @@ class Restful {
    *   All plugins for restful authentication.
    */
   public static function AuthenticationPlugins($plugin_name = NULL, $api = "1.0") {
+    return self::GetPlugins(self::AUTHENTICATION, $plugin_name, $api);
   }
 
   /**
@@ -68,7 +66,29 @@ class Restful {
    * @return array
    *   All plugins for restful authentication.
    */
-  public static function LimitPlugins($plugin_name = NULL, $api = "1.0") {
+  public static function RateLimitPlugins($plugin_name = NULL, $api = "1.0") {
+    return self::GetPlugins(self::RATE_LIMIT, $plugin_name, $api);
+  }
+
+  /**
+   * Private function for get all the type of plugins.
+   *
+   * @param $service
+   *   The name of the service declaring the plugin.
+   * @param null $plugin_name
+   *   If provided this function only returns the selected plugin.
+   * @param string $api
+   *   When initialising a plugin, by providing a plugin name, you can select
+   *   the number of the API number. Default set to 1.0
+   */
+  private static function GetPlugins($service, $plugin_name = NULL, $api = "1.0") {
+    $service = \Drupal::service($service);
+
+    if ($plugin_name) {
+      return $service->createInstance($plugin_name . "-" . $api);
+    }
+
+    return $service->getDefinitions();
   }
 
   /**

@@ -28,7 +28,7 @@ class RateLimitPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/Restful/RateLimit', $namespaces, $module_handler, 'Drupal\restful\Annotation\RateLimit');
+    parent::__construct('Plugin/rate_limit', $namespaces, $module_handler, 'Drupal\restful\Annotation\RateLimit');
     $this->alterInfo('restful_rate_limit_alter');
     $this->setCacheBackend($cache_backend, 'restful_rate_limit');
   }
