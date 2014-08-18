@@ -154,80 +154,6 @@ function restful_plugin_process(&$plugin, $info) {
 }
 
 /**
- * Implements hook_ctools_plugin_type().
- */
-function restful_ctools_plugin_type() {
-  $plugins['authentication'] = $plugins['restful'] = $plugins['rate_limit'] = array(
-    'classes' => array('class'),
-    'process' => 'restful_plugin_process',
-  );
-  $plugins['restful']['child plugins'] = TRUE;
-  return $plugins;
-}
-
-
-/**
- * Include CTools plugins and get all restful plugins.
- *
- * @return array
- *   All plugins for restful resources.
- */
-function restful_get_restful_plugins() {
-  ctools_include('plugins');
-  return ctools_get_plugins('restful', 'restful');
-}
-
-/**
- * Include CTools plugins and get all authentication plugins.
- *
- * @return array
- *   All plugins for restful authentication.
- */
-function restful_get_authentication_plugins() {
-  ctools_include('plugins');
-  return ctools_get_plugins('restful', 'authentication');
-}
-
-/**
- * Include CTools plugins and get all rate_limit plugins.
- *
- * @return array
- *   All plugins for restful authentication.
- */
-function restful_get_rate_limit_plugins() {
-  ctools_include('plugins');
-  return ctools_get_plugins('restful', 'rate_limit');
-}
-
-/**
- * Include CTools plugins and get the specified authentication plugin.
- *
- * @param string $plugin_name
- *   If provided this function only returns the selected plugin.
- *
- * @return array
- *   The selected plugin for restful authentication.
- */
-function restful_get_authentication_plugin($plugin_name) {
-  ctools_include('plugins');
-  return ctools_get_plugins('restful', 'authentication', $plugin_name);
-}
-
-/**
- * Include CTools plugins and get the specified rate_limit plugin.
- *
- * @param string $plugin_name
- *   If provided this function only returns the selected plugin.
- *
- * @return array
- *   The selected plugin for restful authentication.
- */
-function restful_get_rate_limit_plugin($plugin_name) {
-  ctools_include('plugins');
-  return ctools_get_plugins('restful', 'rate_limit', $plugin_name);
-}
-
-/**
  * Implements hook_menu().
  */
 function restful_menu() {
@@ -544,33 +470,6 @@ function restful_parse_request() {
 }
 
 /**
- * Returns data in JSON format.
- *
- * We do not use drupal_json_output(), in order to maintain the "Content-Type"
- * header.
- *
- * @param $var
- *   (optional) If set, the variable will be converted to JSON and output.
- *
- * @see restful_menu_process_callback()
- */
-function restful_json_output($var = NULL) {
-  if (!isset($var)) {
-    return;
-  }
-
-  if (is_int($var)) {
-    _restful_get_json_from_menu_status($var);
-
-    // Adhere to the API Problem draft proposal.
-    drupal_add_http_header('Status', $var['status']);
-    drupal_add_http_header('Content-Type', 'application/problem+json; charset=utf-8');
-  }
-
-  echo drupal_json_encode($var);
-}
-
-/**
  * Convert a menu status response to a valid JSON.
  *
  * @param int $var
@@ -596,32 +495,6 @@ function _restful_get_json_from_menu_status(&$var) {
     'detail' => $e->getDescription(),
     'instance' => $e->getInstance(),
   );
-}
-
-/**
- * Implements hook_entity_info().
- */
-function restful_entity_info() {
-  $items['rate_limit'] = array(
-    'label' => t('Rate limit'),
-    'entity class' => 'RestfulRateLimit',
-    'controller class' => 'EntityAPIController',
-    'base table' => 'restful_rate_limit',
-    'fieldable' => TRUE,
-    'entity keys' => array(
-      'id' => 'rlid',
-      'label' => 'identifier',
-      'bundle' => 'event',
-    ),
-    'bundles' => array(),
-    'bundle keys' => array(
-      'bundle' => 'type',
-    ),
-    'module' => 'restful',
-    'entity cache' => module_exists('entitycache'),
-  );
-
-  return $items;
 }
 
 /**
