@@ -9,16 +9,35 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class Restful {
 
+  CONST RESTFUL = "plugin.manager.restful.restful";
+
   /**
    * Get all restful plugins.
    *
    * @param string $plugin_name
    *   If provided this function only returns the selected plugin.
+   * @param string $api
+   *   When initialising a plugin, by providing a plugin name, you can select
+   *   the number of the API number. Default set to 1.0
    *
    * @return array
    *   All plugins for restful resources.
+   *
+   * @code
+   *  // Get the file upload for 1.0 API.
+   *  $handler = Restful::RestfulPlugins('file_upload');
+   *  // Get the file upload for 1.1 API.
+   *  $handler = Restful::RestfulPlugins('file_upload', '1.1');
+   * @endcode
    */
-  public static function RestfulPlugins($plugin_name = NULL) {
+  public static function RestfulPlugins($plugin_name = NULL, $api = "1.0") {
+    $service = \Drupal::service(self::RESTFUL);
+
+    if ($plugin_name) {
+      return $service->createInstance($plugin_name . "-" . $api);
+    }
+
+    return $service->getDefinitions();
   }
 
   /**
@@ -26,11 +45,14 @@ class Restful {
    *
    * @param string $plugin_name
    *   If provided this function only returns the selected plugin.
+   * @param string $api
+   *   When initialising a plugin, by providing a plugin name, you can select
+   *   the number of the API number. Default set to 1.0
    *
    * @return array
    *   All plugins for restful authentication.
    */
-  public static function AuthenticationPlugins($plugin_name = NULL) {
+  public static function AuthenticationPlugins($plugin_name = NULL, $api = "1.0") {
   }
 
   /**
@@ -38,11 +60,14 @@ class Restful {
    *
    * @param string $plugin_name
    *   If provided this function only returns the selected plugin.
+   * @param string $api
+   *   When initialising a plugin, by providing a plugin name, you can select
+   *   the number of the API number. Default set to 1.0
    *
    * @return array
    *   All plugins for restful authentication.
    */
-  public static function LimitPlugins($plugin_name = NULL) {
+  public static function LimitPlugins($plugin_name = NULL, $api = "1.0") {
   }
 
   /**

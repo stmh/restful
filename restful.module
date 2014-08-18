@@ -501,6 +501,7 @@ function _restful_get_json_from_menu_status(&$var) {
  * Implements hook_cron().
  */
 function restful_cron() {
+  return;
   // Clear the expired restful_rate_limit entries.
   $query = new \EntityFieldQuery();
   $results = $query
