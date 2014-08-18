@@ -5,6 +5,10 @@
  * Contains RestfulAuthenticationManager.
  */
 
+namespace Drupal\restful\Base;
+
+use Drupal\restful\Exception\RestfulUnauthorizedException;
+
 class RestfulAuthenticationManager extends \ArrayObject {
 
   /**
@@ -48,7 +52,7 @@ class RestfulAuthenticationManager extends \ArrayObject {
   /**
    * Adds the auth provider to the list.
    *
-   * @param \RestfulAuthenticationInterface $provider
+   * @param RestfulAuthenticationInterface $provider
    *   The authentication plugin object.
    */
   public function addAuthenticationProvider(RestfulAuthenticationInterface $provider) {
@@ -67,7 +71,7 @@ class RestfulAuthenticationManager extends \ArrayObject {
    * @return \stdClass
    *   The user object.
    */
-  public function getAccount(array $request = array(), $method = \RestfulInterface::GET) {
+  public function getAccount(array $request = array(), $method = RestfulInterface::GET) {
     global $user;
     // Return the previously resolved user, if any.
     if (!empty($this->account)) {
@@ -86,7 +90,7 @@ class RestfulAuthenticationManager extends \ArrayObject {
 
       if ($this->count() && !$this->getIsOptional()) {
         // User didn't authenticate against any provider, so we throw an error.
-        throw new \RestfulUnauthorizedException('Bad credentials');
+        throw new RestfulUnauthorizedException('Bad credentials');
       }
 
       // If the account could not be authenticated default to the global user.

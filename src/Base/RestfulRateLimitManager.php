@@ -4,6 +4,10 @@
  * Contains RestfulRateLimitManager
  */
 
+namespace Drupal\restful\Base;
+
+use Drupal\restful\Exception\RestfulFloodException;
+
 class RestfulRateLimitManager {
   const UNLIMITED_RATE_LIMIT = -1;
 
@@ -79,7 +83,7 @@ class RestfulRateLimitManager {
    * @param array $request
    *   The request array.
    *
-   * @throws \RestfulFloodException if the rate limit has been reached for the
+   * @throws RestfulFloodException if the rate limit has been reached for the
    * current request.
    */
   public function checkRateLimit($request) {
@@ -122,12 +126,12 @@ class RestfulRateLimitManager {
         $rate_limit_entity->expiration = $now->add($info['period'])->format('U');
         $rate_limit_entity->hits = 0;
         if ($limit == 0) {
-          throw new \RestfulFloodException('Rate limit reached');
+          throw new RestfulFloodException('Rate limit reached');
         }
       }
       else {
         if ($rate_limit_entity->hits >= $limit) {
-          throw new \RestfulFloodException('Rate limit reached');
+          throw new RestfulFloodException('Rate limit reached');
         }
       }
       // Save a new hit after generating the exception to mitigate DoS attacks.

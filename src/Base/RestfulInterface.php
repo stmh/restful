@@ -1,10 +1,11 @@
 <?php
 
-
 /**
  * @file
  * Contains RestfulInterface.
  */
+
+namespace Drupal\restful\Base;
 
 interface RestfulInterface {
 
@@ -36,7 +37,7 @@ interface RestfulInterface {
    * @param DrupalCacheInterface $cache_controller
    *   Injected cache controller.
    */
-  public function __construct($plugin, \RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL);
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL);
 
   /**
    * Entry point to process a request.
@@ -55,7 +56,7 @@ interface RestfulInterface {
    * @return mixed
    *   The return value can depend on the controller for the current $method.
    */
-  public function process($path = '', array $request = array(), $method = \RestfulInterface::GET, $check_rate_limit = TRUE);
+  public function process($path = '', array $request = array(), $method = RestfulInterface::GET, $check_rate_limit = TRUE);
 
   /**
    * Return the properties that should be public.

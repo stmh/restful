@@ -5,7 +5,10 @@
  * Contains RestfulEntityBaseUser.
  */
 
-class RestfulEntityBaseUser extends \RestfulEntityBase {
+use Drupal\restful\Base\RestfulEntityBase;
+use Drupal\restful\Exception\RestfulForbiddenException;
+
+class RestfulEntityBaseUser extends RestfulEntityBase {
 
   /**
    * Overrides \RestfulEntityBase::getPublicFields().
@@ -31,7 +34,7 @@ class RestfulEntityBaseUser extends \RestfulEntityBase {
   public function getList() {
     $account = $this->getAccount();
     if (!user_access('administer users', $account) && !user_access('access user profiles', $account)) {
-      throw new \RestfulForbiddenException('You do not have access to listing of users.');
+      throw new RestfulForbiddenException('You do not have access to listing of users.');
     }
     return parent::getList();
   }

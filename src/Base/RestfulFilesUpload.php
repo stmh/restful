@@ -5,14 +5,19 @@
  * Contains RestfulFilesUpload.
  */
 
-class RestfulFilesUpload extends \RestfulEntityBase {
+namespace Drupal\restful\Base;
+
+use Drupal\restful\Exception\RestfulBadRequestException;
+use Drupal\restful\Exception\RestfulUnauthorizedException;
+
+class RestfulFilesUpload extends RestfulEntityBase {
 
   /**
    * Overrides \RestfulEntityBase::controllers.
    */
   protected $controllers = array(
     '' => array(
-      \RestfulInterface::POST => 'createEntity',
+      RestfulInterface::POST => 'createEntity',
     ),
   );
 
@@ -25,7 +30,7 @@ class RestfulFilesUpload extends \RestfulEntityBase {
    *   file size.
    * - "scheme": By default the default scheme (e.g. public, private) is used.
    */
-  public function __construct($plugin, \RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
     parent::__construct($plugin, $auth_manager, $cache_controller);
 
     $options = $this->getPluginInfo('options');
@@ -56,7 +61,7 @@ class RestfulFilesUpload extends \RestfulEntityBase {
    */
   public function createEntity() {
     if (!$_FILES) {
-      throw new \RestfulBadRequestException('No files sent with the request.');
+      throw new RestfulBadRequestException('No files sent with the request.');
     }
 
     $options = $this->getPluginInfo('options');
@@ -101,7 +106,7 @@ class RestfulFilesUpload extends \RestfulEntityBase {
     try {
       $account = $this->getAccount();
     }
-    catch (\RestfulUnauthorizedException $e) {
+    catch (RestfulUnauthorizedException $e) {
       // If a user is not found then load the anonymous user to check
       // permissions.
       $account = drupal_anonymous_user();

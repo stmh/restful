@@ -5,6 +5,8 @@
  * Contains RestfulRateLimitInterface.
  */
 
+namespace Drupal\restful\Base;
+
 interface RestfulRateLimitInterface {
   /**
    * Checks if the current request meets the event for the implementing class.

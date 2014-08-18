@@ -1,10 +1,13 @@
 <?php
 
-
 /**
  * @file
  * Contains RestfulEntityBaseNode.
  */
+
+namespace Drupal\restful\Base;
+
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * A base implementation for "Node" entity type.
@@ -27,7 +30,7 @@ class RestfulEntityBaseNode extends RestfulEntityBase {
    *
    * Set the node author and other defaults.
    */
-  public function entityPreSave(\EntityMetadataWrapper $wrapper) {
+  public function entityPreSave(EntityInterface $wrapper) {
     $node = $wrapper->value();
     if (!empty($node->nid)) {
       // Node is already saved.

@@ -5,6 +5,8 @@
  * Contains RestfulBase.
  */
 
+namespace Drupal\restful\Base;
+
 abstract class RestfulBase implements RestfulInterface {
 
   /**
@@ -21,10 +23,10 @@ abstract class RestfulBase implements RestfulInterface {
   public static function isWriteMethod($method, $strict = TRUE) {
     $method = $strict ? $method : strtoupper($method);
     return in_array($method, array(
-      \RestfulInterface::PUT,
-      \RestfulInterface::POST,
-      \RestfulInterface::PATCH,
-      \RestfulInterface::DELETE,
+      RestfulInterface::PUT,
+      RestfulInterface::POST,
+      RestfulInterface::PATCH,
+      RestfulInterface::DELETE,
     ));
   }
 
@@ -42,11 +44,11 @@ abstract class RestfulBase implements RestfulInterface {
   public static function isReadMethod($method, $strict = TRUE) {
     $method = $strict ? $method : strtoupper($method);
     return in_array($method, array(
-      \RestfulInterface::GET,
-      \RestfulInterface::HEAD,
-      \RestfulInterface::OPTIONS,
-      \RestfulInterface::TRACE,
-      \RestfulInterface::CONNECT,
+      RestfulInterface::GET,
+      RestfulInterface::HEAD,
+      RestfulInterface::OPTIONS,
+      RestfulInterface::TRACE,
+      RestfulInterface::CONNECT,
     ));
   }
 

@@ -1,10 +1,12 @@
 <?php
 
-
 /**
  * @file
  * Contains RestfulEntityBaseTaxonomyTerm.
  */
+
+namespace Drupal\restful\Base;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * A base implementation for "Taxonomy term" entity type.
@@ -16,7 +18,7 @@ class RestfulEntityBaseTaxonomyTerm extends RestfulEntityBase {
    *
    * Set the "vid" property on new terms.
    */
-  protected function setPropertyValues(EntityMetadataWrapper $wrapper, $null_missing_fields = FALSE) {
+  protected function setPropertyValues(EntityInterface $wrapper, $null_missing_fields = FALSE) {
     $term = $wrapper->value();
     if (!empty($term->tid)) {
       return;
@@ -35,7 +37,7 @@ class RestfulEntityBaseTaxonomyTerm extends RestfulEntityBase {
    * have access to update existing terms, as required by the entity metadata
    * wrapper's access check.
    */
-  protected function checkPropertyAccess(EntityMetadataWrapper $property, $op = 'edit', EntityMetadataWrapper $wrapper) {
+  protected function checkPropertyAccess(EntityInterface $property, $op = 'edit', EntityInterface $wrapper) {
     $info = $property->info();
     $term = $wrapper->value();
     if (!empty($info['name']) && $info['name'] == 'name' && empty($term->tid) && $op == 'edit') {

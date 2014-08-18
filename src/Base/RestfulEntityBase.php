@@ -1,10 +1,16 @@
 <?php
 
-
 /**
  * @file
  * Contains RestfulEntityBase.
  */
+
+namespace Drupal\restful\Base;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\restful\Exception\RestfulBadRequestException;
+use Drupal\restful\Exception\RestfulForbiddenException;
+use Drupal\restful\Exception\RestfulGoneException;
+use Drupal\restful\Exception\RestfulUnprocessableEntityException;
 
 /**
  * An abstract implementation of RestfulEntityInterface.
@@ -78,15 +84,15 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   protected $controllers = array(
     '' => array(
       // GET returns a list of entities.
-      \RestfulInterface::GET => 'getList',
+      RestfulInterface::GET => 'getList',
       // POST
-      \RestfulInterface::POST => 'createEntity',
+      RestfulInterface::POST => 'createEntity',
     ),
     '\d+' => array(
-      \RestfulInterface::GET => 'viewEntity',
-      \RestfulInterface::PUT => 'putEntity',
-      \RestfulInterface::PATCH => 'patchEntity',
-      \RestfulInterface::DELETE => 'deleteEntity',
+      RestfulInterface::GET => 'viewEntity',
+      RestfulInterface::PUT => 'putEntity',
+      RestfulInterface::PATCH => 'patchEntity',
+      RestfulInterface::DELETE => 'deleteEntity',
     ),
   );
 
@@ -133,7 +139,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *
    * @var string
    */
-  protected $method = \RestfulInterface::GET;
+  protected $method = RestfulInterface::GET;
 
   /**
    * Get the HTTP method used for the request.
@@ -267,7 +273,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Setter for $authenticationManager.
    *
-   * @param \RestfulAuthenticationManager $authenticationManager
+   * @param RestfulAuthenticationManager $authenticationManager
    */
   public function setAuthenticationManager($authenticationManager) {
     $this->authenticationManager = $authenticationManager;
@@ -276,7 +282,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Getter for $authenticationManager.
    *
-   * @return \RestfulAuthenticationManager
+   * @return RestfulAuthenticationManager
    */
   public function getAuthenticationManager() {
     return $this->authenticationManager;
@@ -312,7 +318,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Setter for rateLimitManager.
    *
-   * @param \RestfulRateLimitManager $rateLimitManager
+   * @param RestfulRateLimitManager $rateLimitManager
    */
   public function setRateLimitManager($rateLimitManager) {
     $this->rateLimitManager = $rateLimitManager;
@@ -321,7 +327,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Getter for rateLimitManager.
 
-   * @return \RestfulRateLimitManager
+   * @return RestfulRateLimitManager
    */
   public function getRateLimitManager() {
     return $this->rateLimitManager;
@@ -337,14 +343,14 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @param DrupalCacheInterface $cache_controller
    *   (optional) Injected cache backend.
    */
-  public function __construct($plugin, \RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
+  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, \DrupalCacheInterface $cache_controller = NULL) {
     $this->plugin = $plugin;
     $this->entityType = $plugin['entity_type'];
     $this->bundle = $plugin['bundle'];
-    $this->authenticationManager = $auth_manager ? $auth_manager : new \RestfulAuthenticationManager();
+    $this->authenticationManager = $auth_manager ? $auth_manager : new RestfulAuthenticationManager();
     $this->cacheController = $cache_controller ? $cache_controller : $this->newCacheObject();
     if (!empty($plugin['rate_limit'])) {
-      $this->setRateLimitManager(new \RestfulRateLimitManager($plugin['resource'], $plugin['rate_limit']));
+      $this->setRateLimitManager(new RestfulRateLimitManager($plugin['resource'], $plugin['rate_limit']));
     }
   }
 
@@ -384,7 +390,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The return value can depend on the controller for the get method.
    */
   public function get($path = '', array $request = array()) {
-    return $this->process($path, $request, \RestfulInterface::GET);
+    return $this->process($path, $request, RestfulInterface::GET);
   }
 
   /**
@@ -399,7 +405,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The return value can depend on the controller for the post method.
    */
   public function post($path = '', array $request = array()) {
-    return $this->process($path, $request, \RestfulInterface::POST);
+    return $this->process($path, $request, RestfulInterface::POST);
   }
 
   /**
@@ -414,7 +420,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The return value can depend on the controller for the put method.
    */
   public function put($path = '', array $request = array()) {
-    return $this->process($path, $request, \RestfulInterface::PUT);
+    return $this->process($path, $request, RestfulInterface::PUT);
   }
 
   /**
@@ -428,7 +434,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The return value can depend on the controller for the patch method.
    */
   public function patch($path = '', array $request = array()) {
-    return $this->process($path, $request, \RestfulInterface::PATCH);
+    return $this->process($path, $request, RestfulInterface::PATCH);
   }
 
   /**
@@ -443,13 +449,13 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The return value can depend on the controller for the delete method.
    */
   public function delete($path = '', array $request = array()) {
-    return $this->process($path, $request, \RestfulInterface::DELETE);
+    return $this->process($path, $request, RestfulInterface::DELETE);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function process($path = '', array $request = array(), $method = \RestfulInterface::GET, $check_rate_limit = TRUE) {
+  public function process($path = '', array $request = array(), $method = RestfulInterface::GET, $check_rate_limit = TRUE) {
     $this->setMethod($method);
     $this->setPath($path);
     $this->setRequest($request);
@@ -605,7 +611,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     $page = isset($request['page']) ? $request['page'] : 1;
 
     if (!ctype_digit((string)$page) || $page < 1) {
-      throw new \RestfulBadRequestException('"Page" property should be numeric and equal or higher than 1.');
+      throw new RestfulBadRequestException('"Page" property should be numeric and equal or higher than 1.');
     }
 
     // We get 1 more item more than the range, in order to know if there is a
@@ -873,7 +879,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       if ($value && $info['process_callback']) {
         if (!is_callable($info['process_callback'])) {
           $callback_name = is_array($info['process_callback']) ? $info['process_callback'][1] : $info['process_callback'];
-          throw new Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
+          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
         }
 
         $value = call_user_func($info['process_callback'], $value);
@@ -894,12 +900,12 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @return string
    *   The target type of the referenced entity.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Errors is the passed field name is invalid.
    */
   protected function getTargetTypeFromEntityReference($property) {
     if (!$field = field_info_field($property)) {
-      throw new Exception('Property is not a field.');
+      throw new \Exception('Property is not a field.');
     }
 
     if ($field['type'] == 'entityreference') {
@@ -909,14 +915,14 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       return 'taxonomy_term';
     }
 
-    throw new Exception('Property is not an entity reference field.');
+    throw new \Exception('Property is not an entity reference field.');
 
   }
 
   /**
    * Get value from an entity reference field with "resource" property.
    *
-   * @param EntityMetadataWrapper $wrapper
+   * @param EntityInterface $wrapper
    *   The wrapped object.
    * @param string $property
    *   The property name (i.e. the field name).
@@ -926,7 +932,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @return mixed
    *   The value if found, or NULL if bundle not defined.
    */
-  protected function getValueFromResource(EntityMetadataWrapper $wrapper, $property, $resource) {
+  protected function getValueFromResource(EntityInterface $wrapper, $property, $resource) {
     $handlers = &drupal_static(__FUNCTION__, array());
 
     $target_type = $this->getTargetTypeFromEntityReference($property);
@@ -1065,7 +1071,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Set properties of the entity based on the request, and save the entity.
    *
-   * @param EntityMetadataWrapper $wrapper
+   * @param EntityInterface $wrapper
    *   The wrapped entity object, passed by reference.
    * @param bool $null_missing_fields
    *   Determine if properties that are missing form the request array should
@@ -1074,7 +1080,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *
    * @throws RestfulBadRequestException
    */
-  protected function setPropertyValues(EntityMetadataWrapper $wrapper, $null_missing_fields = FALSE) {
+  protected function setPropertyValues(EntityInterface $wrapper, $null_missing_fields = FALSE) {
     $account = $this->getAccount();
     $request = $this->getRequest();
 
@@ -1265,7 +1271,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
 
     // Figure the method that should be used.
     if (empty($request['id'])) {
-      $method_name = \RestfulInterface::POST;
+      $method_name = RestfulInterface::POST;
       $path = '';
     }
     else {
@@ -1273,7 +1279,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       // the sub-resource.
       // As any request, under the the "__application" we may pass additional
       // metadata.
-      $method_name = !empty($request['__application']['method']) ? strtoupper($request['__application']['method']) : \RestfulInterface::PATCH;
+      $method_name = !empty($request['__application']['method']) ? strtoupper($request['__application']['method']) : RestfulInterface::PATCH;
       $path = $request['id'];
       // Unset the ID from the sub-request.
       unset($request['id']);
@@ -1363,21 +1369,20 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Allow manipulating the entity before it is saved.
    *
-   * @param \EntityMetadataWrapper $wrapper
+   * @param EntityInterface $wrapper
    *   The unsaved wrapped entity.
    */
-  public function entityPreSave(\EntityMetadataWrapper $wrapper) {}
-
+  public function entityPreSave(EntityInterface $wrapper) {}
 
   /**
    * Validate an entity before it is saved.
    *
-   * @param \EntityMetadataWrapper $wrapper
+   * @param EntityInterface $wrapper
    *   The wrapped entity.
    *
-   * @throws \RestfulBadRequestException
+   * @throws RestfulBadRequestException
    */
-  public function entityValidate(\EntityMetadataWrapper $wrapper) {
+  public function entityValidate(EntityInterface $wrapper) {
     if (!module_exists('entity_validator')) {
       // Entity validator doesn't exist.
       return;
@@ -1413,11 +1418,11 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     if (empty($params['@fields'])) {
       // There was a validation error, but on non-public fields, so we need to
       // throw an exception, but can't say on which fields it occurred.
-      throw new \RestfulBadRequestException('Invalid value(s) sent with the request.');
+      throw new RestfulBadRequestException('Invalid value(s) sent with the request.');
     }
 
     $params['@fields'] = implode(',', $params['@fields']);
-    $e = new \RestfulBadRequestException(format_plural(count($map), 'Invalid value in field @fields.', 'Invalid values in fields @fields.', $params));
+    $e = new RestfulBadRequestException(format_plural(count($map), 'Invalid value in field @fields.', 'Invalid values in fields @fields.', $params));
     foreach ($errors as $property_name => $messages) {
       if (empty($map[$property_name])) {
         // Entity is not valid, but on a field not public.
@@ -1442,18 +1447,18 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Helper method to check access on a property.
    *
-   * @param EntityMetadataWrapper $property
+   * @param EntityInterface $property
    *   The wrapped property.
    * @param $op
    *   The operation that access should be checked for. Can be "view" or "edit".
    *   Defaults to "edit".
-   * @param EntityMetadataWrapper $wrapper
+   * @param EntityInterface $wrapper
    *   The wrapped entity.
    *
    * @return bool
    *   TRUE if the current user has access to set the property, FALSE otherwise.
    */
-  protected function checkPropertyAccess(EntityMetadataWrapper $property, $op = 'edit', EntityMetadataWrapper $wrapper) {
+  protected function checkPropertyAccess(EntityInterface $property, $op = 'edit', EntityInterface $wrapper) {
     $account = $this->getAccount();
     // @todo Hack to check format access for text fields. Should be removed once
     // this is handled properly on the Entity API level.
@@ -1515,7 +1520,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
 
     return TRUE;
   }
-
 
   /**
    * Check access to CRUD an entity.
