@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\restful\Controller;
+use Drupal\restful\Base\RestfulEntityBase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -20,7 +21,7 @@ class Restful {
    *   When initialising a plugin, by providing a plugin name, you can select
    *   the number of the API number. Default set to 1.0
    *
-   * @return array
+   * @return array|RestfulEntityBase
    *   All plugins for restful resources.
    *
    * @code
