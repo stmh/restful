@@ -2,11 +2,13 @@ services:
   plugin.manager.restful.restful:
     class: Drupal\restful\RestfulPluginManager
     parent: default_plugin_manager
-
   plugin.manager.restful.authentication:
     class: Drupal\restful\AuthenticationPluginManager
     parent: default_plugin_manager
-
   plugin.manager.restful.rate_limit:
     class: Drupal\restful\RateLimitPluginManager
     parent: default_plugin_manager
+  restful.subscriber:
+    class: Drupal\restful\Routing\RouteSubscriber
+    tags:
+     - { name: event_subscriber }
