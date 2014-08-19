@@ -11,6 +11,7 @@ use Drupal\restful\Base\RestfulEntityBase;
 use Drupal\restful\Base\RestfulInterface;
 
 /**
+ * todo: change the hook_menu back to false when done.
  * @Restful(
  *  id = "user_login-1.0",
  *  label = @Translation("Login"),
@@ -21,7 +22,7 @@ use Drupal\restful\Base\RestfulInterface;
  *  authentication_types = {
  *    "basic_auth"
  *  },
- *  hook_menu = FALSE
+ *  hook_menu = TRUE
  * )
  */
 class RestfulUserLoginCookie extends RestfulEntityBase {

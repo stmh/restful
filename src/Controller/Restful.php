@@ -113,21 +113,27 @@ class Restful {
    * We do not use drupal_json_output(), in order to maintain the "Content-Type"
    * header.
    *
-   * @param $var
-   *   (optional) If set, the variable will be converted to JSON and output.
+   * @param $api
+   *   The API version.
+   * @param $resource
+   *   The resource.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *
    * @see restful_menu_process_callback()
    */
-  public static function JsonOutput($var) {
+  public static function JsonOutput($api, $resource) {
     $response = new Response();
 
     // Adhere to the API Problem draft proposal.
-    $response->headers->set('Status', $var['status']);
-    $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
+//    $response->headers->set('Status', $var['status']);
+//    $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
+
+    return new JsonResponse('welcome!' . $api . $resource);
+
+    $plugin = Restful::RestfulPlugins($resource, $api);
 
     $matches = array();
-    return new JsonResponse($matches);
+    return 'a';
   }
 }

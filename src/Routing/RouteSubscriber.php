@@ -9,6 +9,7 @@ namespace Drupal\restful\Routing;
 
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\restful\Controller\Restful;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -25,17 +26,40 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The route collection for adding routes.
    */
   protected function alterRoutes(RouteCollection $collection) {
+
+    $plugins = Restful::RestfulPlugins();
+
+    $config = \Drupal::config('restful.restful');
+
+    foreach ($plugins as $plugin) {
+
+      if (!$plugin['hook_menu']) {
+        continue;
+      }
+
+      // todo: check if we need this.
+
+      if ($plugin['hook_menu'] && empty($plugin['menu_item'])) {
+        // Set a default menu item.
+        // todo: set to 'api/%'.
+        $base_path = $config->get('hook_menu_base_path') ? : 'api/{api}/{resource}';
+
+        $route = new Route(
+          $base_path,
+          array(
+            '_content' => 'Drupal\restful\Controller\Restful::JsonOutput',
+          ),
+          array(
+            // todo
+            '_permission' => 'access content',
+          )
+        );
+
+        $collection->add('restful.' . $plugin['id'], $route);
+      }
+    }
+
     return;
-//    $route = new Route(
-//      "$path/fields/{field_instance_config}",
-//      array(
-//        '_form' => '\Drupal\field_ui\Form\FieldInstanceEditForm',
-//        '_title_callback' => '\Drupal\field_ui\Form\FieldInstanceEditForm::getTitle',
-//      ),
-//      array('_entity_access' => 'field_instance_config.update'),
-//      $options
-//    );
-//    $collection->add("field_ui.instance_edit_$entity_type_id", $route);
     foreach (restful_get_restful_plugins() as $plugin) {
       if (!$plugin['hook_menu']) {
         // Plugin explicitly declared no hook menu should be created automatically

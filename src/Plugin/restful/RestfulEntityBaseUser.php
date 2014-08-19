@@ -11,6 +11,7 @@ use Drupal\restful\Base\RestfulEntityBase;
 use Drupal\restful\Exception\RestfulForbiddenException;
 
 /**
+ * todo: change the hook_menu back to false when done.
  * @Restful(
  *  id = "user-1.0",
  *  label = @Translation("User"),
@@ -20,7 +21,7 @@ use Drupal\restful\Exception\RestfulForbiddenException;
  *  bundle = "user",
  *  authentication_types = TRUE,
  *  authentication_optional = TRUE,
- *  hook_menu = FALSE
+ *  hook_menu = TRUE
  * )
  */
 class RestfulEntityBaseUser extends RestfulEntityBase {
