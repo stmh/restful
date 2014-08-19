@@ -7,7 +7,9 @@
 
 namespace Drupal\restful\Base;
 
-abstract class RestfulBase implements RestfulInterface {
+use Drupal\Core\Plugin\PluginBase;
+
+abstract class RestfulBase extends PluginBase implements RestfulInterface {
 
   /**
    * Determines if the HTTP method represents a write operation.

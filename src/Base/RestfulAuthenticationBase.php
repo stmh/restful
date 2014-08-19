@@ -7,7 +7,9 @@
 
 namespace Drupal\restful\Base;
 
-abstract class RestfulAuthenticationBase implements RestfulAuthenticationInterface {
+use Drupal\Core\Plugin\PluginBase;
+
+abstract class RestfulAuthenticationBase extends PluginBase implements RestfulAuthenticationInterface {
 
   /**
    * Settings from the plugin definition.
@@ -26,7 +28,7 @@ abstract class RestfulAuthenticationBase implements RestfulAuthenticationInterfa
   /**
    * Constructor.
    */
-  public function __construct($plugin) {
+  public function ___construct($plugin) {
     $this->settings = $plugin['settings'];
     $this->plugin = $plugin;
   }

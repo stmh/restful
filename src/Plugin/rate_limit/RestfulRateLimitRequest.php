@@ -8,6 +8,7 @@
 namespace Drupal\restful\Plugin\RateLimit;
 
 use Drupal\restful\Base\RestfulRateLimitInterface;
+use Drupal\Core\Plugin\PluginBase;
 
 /**
  * @RateLimit(
@@ -17,7 +18,7 @@ use Drupal\restful\Base\RestfulRateLimitInterface;
  *  name = "request"
  * )
  */
-class RestfulRateLimitRequest implements RestfulRateLimitInterface {
+class RestfulRateLimitRequest extends PluginBase implements RestfulRateLimitInterface {
 
   /**
    * {@inheritdoc}
