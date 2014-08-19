@@ -14,9 +14,9 @@ use Drupal\restful\Exception\RestfulForbiddenException;
  * @Restful(
  *  id = "user-1.0",
  *  label = @Translation("User"),
- *  description = @Translation("Export the "User" entity."),
+ *  description = @Translation("Export the 'User' entity."),
  *  resource = "users",
- *  entity_type = "file",
+ *  entity_type = "user",
  *  bundle = "user",
  *  authentication_types = TRUE,
  *  authentication_optional = TRUE,

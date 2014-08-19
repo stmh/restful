@@ -12,14 +12,14 @@ use Drupal\restful\Base\RestfulInterface;
 
 /**
  * @Restful(
- *  id = "user_login-1.0"
+ *  id = "user_login-1.0",
  *  label = @Translation("Login"),
- *  description = @Translation("Login a user and return a JSON along with the authentication cookie.."),
+ *  description = @Translation("Login a user and return a JSON along with the authentication cookie."),
  *  resource = "login_cookie",
  *  entity_type = "user",
  *  bundle = "user",
  *  authentication_types = {
- *    'basic_auth',
+ *    "basic_auth"
  *  },
  *  hook_menu = FALSE
  * )
