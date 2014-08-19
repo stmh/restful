@@ -2,7 +2,9 @@
 
 namespace Drupal\restful\Controller;
 
-use Drupal\restful\Base\RestfulEntityBase;
+use Drupal\restful\Base\RestfulAuthenticationInterface;
+use Drupal\restful\Base\RestfulEntityInterface;
+use Drupal\restful\Base\RestfulRateLimitInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -24,7 +26,7 @@ class Restful {
    *   When initialising a plugin, by providing a plugin name, you can select
    *   the number of the API number. Default set to 1.0
    *
-   * @return array|RestfulEntityBase
+   * @return array|RestfulEntityInterface
    *   All plugins for restful resources.
    *
    * @code
@@ -47,8 +49,15 @@ class Restful {
    *   When initialising a plugin, by providing a plugin name, you can select
    *   the number of the API number. Default set to 1.0
    *
-   * @return array
+   * @return array|RestfulAuthenticationInterface
    *   All plugins for restful authentication.
+   *
+   * @code
+   *  // Get the restful authentication for 1.0 API.
+   *  $handler = Restful::RestfulPlugins('restful_authentication');
+   *  // Get the restful authentication for 1.1 API.
+   *  $handler = Restful::RestfulPlugins('restful_authentication', '1.1');
+   * @endcode
    */
   public static function AuthenticationPlugins($plugin_name = NULL, $api = "1.0") {
     return self::GetPlugins(self::AUTHENTICATION, $plugin_name, $api);
@@ -63,8 +72,15 @@ class Restful {
    *   When initialising a plugin, by providing a plugin name, you can select
    *   the number of the API number. Default set to 1.0
    *
-   * @return array
+   * @return array|RestfulRateLimitInterface
    *   All plugins for restful authentication.
+   *
+   * @code
+   *  // Get the restful authentication for 1.0 API.
+   *  $handler = Restful::RestfulPlugins('request');
+   *  // Get the restful authentication for 1.1 API.
+   *  $handler = Restful::RestfulPlugins('request', '1.1');
+   * @endcode
    */
   public static function RateLimitPlugins($plugin_name = NULL, $api = "1.0") {
     return self::GetPlugins(self::RATE_LIMIT, $plugin_name, $api);
@@ -111,6 +127,7 @@ class Restful {
     $response->headers->set('Status', $var['status']);
     $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
 
+    $matches = array();
     return new JsonResponse($matches);
   }
 }
