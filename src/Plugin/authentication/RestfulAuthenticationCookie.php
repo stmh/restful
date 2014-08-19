@@ -1,15 +1,32 @@
 <?php
+
 /**
  * @file
  * Contains RestfulAuthenticationCookie.
  */
 
+namespace Drupal\restful\Plugin\Authentication;
+
+use Drupal\restful\Base\RestfulAuthenticationBase;
+use Drupal\restful\Base\RestfulAuthenticationInterface;
+use Drupal\restful\Base\RestfulBase;
+use Drupal\restful\Base\RestfulInterface;
+use Drupal\restful\Exception\RestfulBadRequestException;
+use Drupal\restful\Exception\RestfulForbiddenException;
+
+/**
+ * @Authentication(
+ *  id = "cookie-1.0",
+ *  label = @Translation("Cookie based authentication"),
+ *  description = @Translation("Authenticate requests based on the user cookie."),
+ * )
+ */
 class RestfulAuthenticationCookie extends RestfulAuthenticationBase implements RestfulAuthenticationInterface {
 
   /**
    * Implements RestfulAuthenticationInterface::authenticate().
    */
-  public function authenticate(array $request = array(), $method = \RestfulInterface::GET) {
+  public function authenticate(array $request = array(), $method = RestfulInterface::GET) {
     if (!drupal_session_started() && !$this->isCli()) {
       return;
     }
@@ -17,18 +34,18 @@ class RestfulAuthenticationCookie extends RestfulAuthenticationBase implements R
     global $user;
     $account = user_load($user->uid);
 
-    if (!\RestfulBase::isWriteMethod($method) || empty($request['__application']['rest_call'])) {
+    if (!RestfulBase::isWriteMethod($method) || empty($request['__application']['rest_call'])) {
       // Request is done via API not CURL, or not a write operation, so we don't
       // need to check for a CSRF token.
       return $account;
     }
 
     if (empty($request['__application']['csrf_token'])) {
-      throw new \RestfulBadRequestException('No CSRF token passed in the HTTP header.');
+      throw new RestfulBadRequestException('No CSRF token passed in the HTTP header.');
     }
 
-    if (!drupal_valid_token($request['__application']['csrf_token'], \RestfulBase::TOKEN_VALUE)) {
-      throw new \RestfulForbiddenException('CSRF token validation failed.');
+    if (!drupal_valid_token($request['__application']['csrf_token'], RestfulBase::TOKEN_VALUE)) {
+      throw new RestfulForbiddenException('CSRF token validation failed.');
     }
 
     // CSRF validation passed.

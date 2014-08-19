@@ -1,14 +1,24 @@
 <?php
-use Drupal\restful\Base\RestfulAuthenticationBase;
-use Drupal\restful\Base\RestfulAuthenticationInterface;
-use Drupal\restful\Base\RestfulInterface;
-use Drupal\restful\Exception\RestfulFloodException;
 
 /**
  * @file
  * Contains RestfulAuthenticationBasic
  */
 
+namespace Drupal\restful\Plugin\Authentication;
+
+use Drupal\restful\Base\RestfulAuthenticationInterface;
+use Drupal\restful\Base\RestfulInterface;
+use Drupal\restful\Exception\RestfulFloodException;
+use Drupal\restful\Base\RestfulAuthenticationBase;
+
+/**
+ * @Authentication(
+ *  id = "basic_auth-1.0",
+ *  label = @Translation("Basic authentication"),
+ *  description = @Translation("Authenticate requests based on basic auth."),
+ * )
+ */
 class RestfulAuthenticationBasic extends RestfulAuthenticationBase implements RestfulAuthenticationInterface {
 
   /**

@@ -1,29 +1,27 @@
 <?php
-use Drupal\restful\Base\RestfulEntityBase;
-use Drupal\restful\Base\RestfulInterface;
 
 /**
  * @file
  * Contains RestfulUserLoginCookie.
  */
 
-$plugin = array(
-  'label' => t('Login'),
-  'description' => t('Login a user and return a JSON along with the authentication cookie..'),
-  'resource' => 'login_cookie',
-  'class' => 'RestfulUserLoginCookie',
-  'entity_type' => 'user',
-  'bundle' => 'user',
-  'authentication_types' => array(
-    'basic_auth',
-  ),
-  // We will implement hook_menu() with custom settings.
-  'hook_menu' => FALSE,
-);
+namespace Drupal\restful\Plugin\Restful;
+
+use Drupal\restful\Base\RestfulEntityBase;
+use Drupal\restful\Base\RestfulInterface;
 
 /**
  * @Restful(
  *  id = "user_login-1.0"
+ *  label = @Translation("Login"),
+ *  description = @Translation("Login a user and return a JSON along with the authentication cookie.."),
+ *  resource = "login_cookie",
+ *  entity_type = "user",
+ *  bundle = "user",
+ *  authentication_types = {
+ *    'basic_auth',
+ *  },
+ *  hook_menu = FALSE
  * )
  */
 class RestfulUserLoginCookie extends RestfulEntityBase {
