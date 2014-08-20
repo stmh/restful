@@ -131,9 +131,64 @@ class Restful {
 
     return new JsonResponse('welcome!' . $api . $resource);
 
-    $plugin = Restful::RestfulPlugins($resource, $api);
+    // Original functionality.
+    $major_version = intval(str_replace('v', '', $major_version));
+    $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_numeric($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
+    $handler = restful_get_restful_handler($resource_name, $major_version, $minor_version);
 
-    $matches = array();
-    return 'a';
+    $path = func_get_args();
+    unset($path[0], $path[1]);
+    $path = implode('/', $path);
+
+    $method = strtolower($_SERVER['REQUEST_METHOD']);
+
+    if ($method == 'options') {
+      // OPTIONS method is a special case that might be sent by the browser
+      // before the actual method to check for CORS (known as preflight OPTIONS).
+      drupal_add_http_header('Status', 204);
+      drupal_add_http_header('Content-Type', 'application/hal+json; charset=utf-8');
+      return;
+    }
+
+    $request = restful_parse_request();
+
+    try {
+      $result = $handler->{$method}($path, $request);
+      // Allow the handler to change the HTTP headers.
+      foreach ($handler->getHttpHeaders() as $key => $value) {
+        drupal_add_http_header($key, $value);
+      }
+
+      drupal_add_http_header('Content-Type', 'application/hal+json; charset=utf-8');
+      return $result;
+    }
+    catch (RestfulException $e) {
+      $result = array(
+        'type' => $e->getType(),
+        'title' => $e->getMessage(),
+        'status' => $e->getCode(),
+        'detail' => $e->getDescription(),
+      );
+
+      if ($instance = $e->getInstance()) {
+        $result['instance'] = $instance;
+      }
+
+      if ($errors = $e->getFieldErrors()) {
+        $result['errors'] = $errors;
+      }
+    }
+    catch (Exception $e) {
+      $result = array(
+        'type' => 'http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1',
+        'title' => $e->getMessage(),
+        'status' => 500,
+      );
+    }
+
+    // Adhere to the API Problem draft proposal.
+    drupal_add_http_header('Status', $result['status']);
+    drupal_add_http_header('Content-Type', 'application/problem+json; charset=utf-8');
+    return $result;
   }
 }

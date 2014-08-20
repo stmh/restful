@@ -26,9 +26,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The route collection for adding routes.
    */
   protected function alterRoutes(RouteCollection $collection) {
-
     $plugins = Restful::RestfulPlugins();
-
     $config = \Drupal::config('restful.restful');
 
     foreach ($plugins as $plugin) {
@@ -37,8 +35,6 @@ class RouteSubscriber extends RouteSubscriberBase {
         continue;
       }
 
-      // todo: check if we need this.
-
       if ($plugin['hook_menu'] && empty($plugin['menu_item'])) {
         // Set a default menu item.
         // todo: set to 'api/%'.
@@ -46,13 +42,8 @@ class RouteSubscriber extends RouteSubscriberBase {
 
         $route = new Route(
           $base_path,
-          array(
-            '_content' => 'Drupal\restful\Controller\Restful::JsonOutput',
-          ),
-          array(
-            // todo
-            '_permission' => 'access content',
-          )
+          array('_content' => 'Drupal\restful\Controller\Restful::JsonOutput'),
+          array('_restful_restful' => 'TRUE')
         );
 
         $collection->add('restful.' . $plugin['id'], $route);
@@ -60,22 +51,6 @@ class RouteSubscriber extends RouteSubscriberBase {
     }
 
     return;
-    foreach (restful_get_restful_plugins() as $plugin) {
-      if (!$plugin['hook_menu']) {
-        // Plugin explicitly declared no hook menu should be created automatically
-        // for it.
-        continue;
-      }
-
-      $items[$plugin['menu_item']] = array(
-        'title' => $plugin['name'],
-        'access callback' => 'restful_menu_access_callback',
-        'access arguments' => array(1, 2),
-        'page callback' => 'restful_menu_process_callback',
-        'page arguments' => array(1, 2),
-        'delivery callback' => 'restful_json_output',
-      );
-    }
 
     // A special login endpoint, that returns a JSON output along with the Drupal
     // authentication cookie.
