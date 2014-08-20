@@ -11,6 +11,8 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeTypeInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Route;
 
 /**
  * Determines access to for node add pages.
@@ -18,18 +20,19 @@ use Drupal\node\NodeTypeInterface;
 class RestfulAccessCheck implements AccessInterface {
 
   /**
-   * Checks access to the node add page for the node type.
+   * Checks access to the form mode.
    *
+   * @param \Symfony\Component\Routing\Route $route
+   *   The route to check against.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The currently logged in account.
-   * @param \Drupal\node\NodeTypeInterface $node_type
-   *   (optional) The node type. If not specified, access is allowed if there
-   *   exists at least one node type for which the user may create a node.
    *
    * @return string
    *   A \Drupal\Core\Access\AccessInterface constant value.
    */
-  public function access(AccountInterface $account, NodeTypeInterface $node_type = NULL) {
+  public function access(Route $route, Request $request, AccountInterface $account) {
     return static::ALLOW;
     return static::DENY;
 
@@ -55,4 +58,5 @@ class RestfulAccessCheck implements AccessInterface {
 
     return $handler->access();
   }
+
 }

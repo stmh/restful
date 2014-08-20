@@ -8,7 +8,6 @@
 namespace Drupal\restful\Routing;
 
 use Drupal\Core\Routing\RouteSubscriberBase;
-use Drupal\Core\Routing\RoutingEvents;
 use Drupal\restful\Controller\Restful;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
