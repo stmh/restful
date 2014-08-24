@@ -11,6 +11,11 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeTypeInterface;
+use Drupal\restful\Base\RestfulBase;
+use Drupal\restful\Controller\Restful;
+use Drupal\restful\Exception\RestfulBadRequestException;
+use SebastianBergmann\Exporter\Exception;
+use Symfony\Component\CssSelector\Node\NodeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 
@@ -28,35 +33,35 @@ class RestfulAccessCheck implements AccessInterface {
    *   The request object.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The currently logged in account.
+   * @param $api
+   *   The API version of the plugin.
+   * @param $resource
+   *   The type of the resource. i.e: users, files etc. etc.
    *
    * @return string
    *   A \Drupal\Core\Access\AccessInterface constant value.
    */
-  public function access(Route $route, Request $request, AccountInterface $account) {
-    return static::ALLOW;
-    return static::DENY;
-
-    // The original functionality.
-    if ($major_version[0] != 'v') {
+  public function access(Route $route, Request $request, AccountInterface $account, $api, $resource) {
+    if ($api[0] != 'v') {
       // Major version not prefixed with "v".
-      return;
+      return static::DENY;
     }
 
-    if (!$major_version = intval(str_replace('v', '', $major_version))) {
+    if (!$major_version = intval(str_replace('v', '', $api))) {
       // Major version is not an integer.
-      return;
+      return static::DENY;
     }
 
     $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_int($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
-    if (!$handler = restful_get_restful_handler($resource_name, $major_version, $minor_version)) {
-      return;
+    if (!RestfulBase::isValidMethod($_SERVER['REQUEST_METHOD'], FALSE)) {
+      return static::DENY;
     }
 
-    if (!\RestfulBase::isValidMethod($_SERVER['REQUEST_METHOD'], FALSE)) {
-      return;
+    if (!$plugin = Restful::RestfulPlugins($resource, $major_version . '.' . $minor_version)) {
+      return static::DENY;
     }
 
-    return $handler->access();
+    return $plugin->access();
   }
 
 }

@@ -99,9 +99,10 @@ class Restful {
    */
   private static function GetPlugins($service, $plugin_name = NULL, $api = "1.0") {
     $service = \Drupal::service($service);
+    $definitions = $service->getDefinitions();
 
     if ($plugin_name) {
-      return $service->createInstance($plugin_name . "-" . $api);
+      return in_array($plugin_name . "-" . $api, array_keys($definitions)) ? $service->createInstance($plugin_name . "-" . $api) : NULL;
     }
 
     return $service->getDefinitions();
