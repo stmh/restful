@@ -125,14 +125,14 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Authentication manager.
    *
-   * @var \RestfulAuthenticationManager
+   * @var RestfulAuthenticationManager
    */
   protected $authenticationManager;
 
   /**
    * Rate limit manager.
    *
-   * @var \RestfulRateLimitManager
+   * @var RestfulRateLimitManager
    */
   protected $rateLimitManager = NULL;
 
@@ -345,11 +345,17 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @param CacheBackendInterface $cache_controller
    *   (optional) Injected cache backend.
    */
-  public function construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_definition, $plugin_definition);
+
+//    $this->authenticationManager = $auth_manager ? $auth_manager : new RestfulAuthenticationManager();
+    $this->authenticationManager = new RestfulAuthenticationManager();
+
+    return;
+    // $plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL
     $this->plugin = $plugin;
     $this->entityType = $plugin['entity_type'];
     $this->bundle = $plugin['bundle'];
-    $this->authenticationManager = $auth_manager ? $auth_manager : new RestfulAuthenticationManager();
     $this->cacheController = $cache_controller ? $cache_controller : $this->newCacheObject();
     if (!empty($plugin['rate_limit'])) {
       $this->setRateLimitManager(new RestfulRateLimitManager($plugin['resource'], $plugin['rate_limit']));

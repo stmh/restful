@@ -9,7 +9,6 @@ namespace Drupal\restful\Base;
 
 use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\node\Plugin\views\filter\Access;
 
 abstract class RestfulBase extends PluginBase implements RestfulInterface {
 
