@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\restful\Base;
+use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
@@ -344,7 +345,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @param CacheBackendInterface $cache_controller
    *   (optional) Injected cache backend.
    */
-  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL) {
+  public function construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL) {
     $this->plugin = $plugin;
     $this->entityType = $plugin['entity_type'];
     $this->bundle = $plugin['bundle'];
@@ -1574,7 +1575,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * {@inheritdoc}
    */
   public function access() {
-    return TRUE;
+    return AccessInterface::ALLOW;
   }
 
   /**

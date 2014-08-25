@@ -7,6 +7,8 @@
 
 namespace Drupal\restful\Plugin\Restful;
 
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\restful\Base\RestfulAuthenticationManager;
 use Drupal\restful\Base\RestfulEntityBase;
 use Drupal\restful\Exception\RestfulForbiddenException;
 

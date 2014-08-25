@@ -7,7 +7,9 @@
 
 namespace Drupal\restful\Base;
 
+use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\node\Plugin\views\filter\Access;
 
 abstract class RestfulBase extends PluginBase implements RestfulInterface {
 
@@ -68,5 +70,9 @@ abstract class RestfulBase extends PluginBase implements RestfulInterface {
   public static function isValidMethod($method, $strict = TRUE) {
     $method = $strict ? $method : strtolower($method);
     return static::isReadMethod($method, $strict) || static::isWriteMethod($method, $strict);
+  }
+
+  public function access() {
+    return AccessInterface::ALLOW;
   }
 }

@@ -39,7 +39,9 @@ interface RestfulInterface {
    * @param CacheBackendInterface $cache_controller
    *   Injected cache controller.
    */
-  public function __construct($plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL);
+
+  // $plugin, RestfulAuthenticationManager $auth_manager = NULL, CacheBackendInterface $cache_controller = NULL
+//  public function ___construct();
 
   /**
    * Entry point to process a request.

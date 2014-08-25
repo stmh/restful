@@ -7,6 +7,7 @@
 
 namespace Drupal\restful\Plugin\Restful;
 
+use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\restful\Base\RestfulAuthenticationManager;
 use Drupal\restful\Base\RestfulEntityBase;
@@ -125,6 +126,7 @@ class RestfulFilesUpload extends RestfulEntityBase {
    * Overrides RestfulEntityBase::access().
    */
   public function access() {
+    return AccessInterface::ALLOW;
     // The getAccount method may return a RestfulUnauthorizedException when an
     // authenticated user cannot be found. Since this is called from the access
     // callback, not from the page callback we need to catch the exception.

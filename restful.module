@@ -311,43 +311,6 @@ function restful_menu_process_callback($major_version, $resource_name) {
 }
 
 /**
- * Build the request array from PHP globals and input stream.
- *
- * @return array
- *   The request array.
- */
-function restful_parse_request() {
-  $request = NULL;
-  $method = strtoupper($_SERVER['REQUEST_METHOD']);
-
-  if ($method == \RestfulInterface::GET) {
-    $request = $_GET;
-  }
-  elseif ($method == \RestfulInterface::POST) {
-    $request = $_POST;
-  }
-
-  if (!$request && $query_string = file_get_contents('php://input')) {
-    // When trying to POST using curl on simpleTest it doesn't reach
-    // $_POST, so we try to re-grab it here.
-    parse_str($query_string, $request);
-  }
-
-
-  // This flag is used to identify if the request is done "via Drupal" or "via
-  // CURL";
-  $request['__application'] = array(
-    'rest_call' => TRUE,
-    'csrf_token' => !empty($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : NULL,
-  );
-
-  // Allow implemeting modules to alter the request.
-  drupal_alter('restful_parse_request', $request);
-
-  return $request;
-}
-
-/**
  * Convert a menu status response to a valid JSON.
  *
  * @param int $var

@@ -4,7 +4,9 @@ namespace Drupal\restful\Controller;
 
 use Drupal\restful\Base\RestfulAuthenticationInterface;
 use Drupal\restful\Base\RestfulEntityInterface;
+use Drupal\restful\Base\RestfulInterface;
 use Drupal\restful\Base\RestfulRateLimitInterface;
+use Drupal\restful\Exception\RestfulException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -126,16 +128,9 @@ class Restful {
   public static function JsonOutput($api, $resource) {
     $response = new Response();
 
-    // Adhere to the API Problem draft proposal.
-//    $response->headers->set('Status', $var['status']);
-//    $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
-
-    return new JsonResponse('welcome!' . $api . $resource);
-
-    // Original functionality.
-    $major_version = intval(str_replace('v', '', $major_version));
-    $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_numeric($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
-    $handler = restful_get_restful_handler($resource_name, $major_version, $minor_version);
+    $major_version = intval(str_replace('v', '', $api));
+    $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_int($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
+    $plugin = Restful::RestfulPlugins($resource, $major_version . '.' . $minor_version);
 
     $path = func_get_args();
     unset($path[0], $path[1]);
@@ -145,22 +140,23 @@ class Restful {
 
     if ($method == 'options') {
       // OPTIONS method is a special case that might be sent by the browser
-      // before the actual method to check for CORS (known as preflight OPTIONS).
-      drupal_add_http_header('Status', 204);
-      drupal_add_http_header('Content-Type', 'application/hal+json; charset=utf-8');
+      // before the actual method to check for CORS (known as preflight
+      // OPTIONS).
+      $response->headers->set('Status', 204);
+      $response->headers->set('Content-Type', 'application/hal+json; charset=utf-8');
       return;
     }
 
-    $request = restful_parse_request();
+    $request = self::parseRequest();
 
     try {
-      $result = $handler->{$method}($path, $request);
+      $result = $plugin->{$method}($path, $request);
       // Allow the handler to change the HTTP headers.
-      foreach ($handler->getHttpHeaders() as $key => $value) {
-        drupal_add_http_header($key, $value);
+      foreach ($plugin->getHttpHeaders() as $key => $value) {
+        $response->headers->set($key, $value);
       }
 
-      drupal_add_http_header('Content-Type', 'application/hal+json; charset=utf-8');
+      $response->headers->set('Content-Type', 'application/hal+json; charset=utf-8');
       return $result;
     }
     catch (RestfulException $e) {
@@ -179,7 +175,7 @@ class Restful {
         $result['errors'] = $errors;
       }
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       $result = array(
         'type' => 'http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1',
         'title' => $e->getMessage(),
@@ -188,8 +184,44 @@ class Restful {
     }
 
     // Adhere to the API Problem draft proposal.
-    drupal_add_http_header('Status', $result['status']);
-    drupal_add_http_header('Content-Type', 'application/problem+json; charset=utf-8');
+    $response->headers->set('Status', $var['status']);
+    $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
     return $result;
+  }
+
+  /**
+   * Build the request array from PHP globals and input stream.
+   *
+   * @return array
+   *   The request array.
+   */
+  public static function parseRequest() {
+    $request = NULL;
+    $method = strtoupper($_SERVER['REQUEST_METHOD']);
+
+    if ($method == RestfulInterface::GET) {
+      $request = $_GET;
+    }
+    elseif ($method == RestfulInterface::POST) {
+      $request = $_POST;
+    }
+
+    if (!$request && $query_string = file_get_contents('php://input')) {
+      // When trying to POST using curl on simpleTest it doesn't reach
+      // $_POST, so we try to re-grab it here.
+      parse_str($query_string, $request);
+    }
+
+    // This flag is used to identify if the request is done "via Drupal" or "via
+    // CURL";
+    $request['__application'] = array(
+      'rest_call' => TRUE,
+      'csrf_token' => !empty($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : NULL,
+    );
+
+    // Allow implementing modules to alter the request.
+    \Drupal::moduleHandler()->alter('restful_parse_request', $request);
+
+    return $request;
   }
 }
