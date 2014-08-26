@@ -9,6 +9,7 @@ namespace Drupal\restful\Base;
 use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulForbiddenException;
 use Drupal\restful\Exception\RestfulGoneException;
@@ -314,7 +315,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @return string
    */
   public function getEntityType() {
-    return $this->entityType;
+    return $this->pluginDefinition['entity_type'];
   }
 
   /**
@@ -477,7 +478,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       $this->getRateLimitManager()->checkRateLimit($request);
     }
 
-    return $this->{$method_name}($path);
+    $this->{$method_name}($path);
   }
 
   /**
@@ -530,14 +531,15 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     $request = $this->getRequest();
     $autocomplete_options = $this->getPluginInfo('autocomplete');
     if (!empty($autocomplete_options['enable']) && isset($request['autocomplete']['string'])) {
+      // todo: fix.
       // Return autocomplete list.
       return $this->getListForAutocomplete();
     }
 
     $entity_type = $this->entityType;
     $result = $this
-      ->getQueryForList()
-      ->execute();
+      ->getQueryForList();
+//      ->execute();
 
 
     if (empty($result[$entity_type])) {
@@ -566,18 +568,21 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Prepare a query for RestfulEntityBase::getList().
    *
-   * @return EntityFieldQuery
+   * @return QueryInterface
    *   The EntityFieldQuery object.
    *
    * @throws RestfulBadRequestException
    */
   public function getQueryForList() {
     $request = $this->getRequest();
-
     $entity_type = $this->getEntityType();
-    $entity_info = entity_get_info($entity_type);
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $this->getEntityType());
+    $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
+    $query = \Drupal::entityQuery($entity_type);
+    dpm($entity_info->getBundleOf());
+    if ($this->bundle) {
+    }
+
+    return;
 
     if ($this->bundle && $entity_info['entity keys']['bundle']) {
       $query->entityCondition('bundle', $this->getBundle());

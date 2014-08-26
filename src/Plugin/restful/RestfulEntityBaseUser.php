@@ -50,10 +50,11 @@ class RestfulEntityBaseUser extends RestfulEntityBase {
    * Make sure only privileged users may see a list of users.
    */
   public function getList() {
-    $account = $this->getAccount();
-    if (!user_access('administer users', $account) && !user_access('access user profiles', $account)) {
-      throw new RestfulForbiddenException('You do not have access to listing of users.');
-    }
+    // todo: fix!.
+//    $account = $this->getAccount();
+//    if (!user_access('administer users', $account) && !user_access('access user profiles', $account)) {
+//      throw new RestfulForbiddenException('You do not have access to listing of users.');
+//    }
     return parent::getList();
   }
 
@@ -64,6 +65,7 @@ class RestfulEntityBaseUser extends RestfulEntityBase {
    */
   public function getQueryForList() {
     $query = parent::getQueryForList();
+    return;
     $query->entityCondition('entity_id', 0, '>');
     return $query;
   }
