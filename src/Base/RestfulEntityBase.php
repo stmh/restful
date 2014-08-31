@@ -319,6 +319,15 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   }
 
   /**
+   * Return the entity definition.
+   *
+   * @return \Drupal\Core\Entity\EntityTypeInterface|null
+   */
+  public function getEntityDefinition() {
+    return \Drupal::entityManager()->getDefinition($this->getEntityType());
+  }
+
+  /**
    * Setter for rateLimitManager.
    *
    * @param RestfulRateLimitManager $rateLimitManager
@@ -576,19 +585,19 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   public function getQueryForList() {
     $request = $this->getRequest();
     $entity_type = $this->getEntityType();
-    $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
+    $entity_info = $this->getEntityDefinition();
     $query = \Drupal::entityQuery($entity_type);
-    dpm($entity_info->getBundleOf());
-    if ($this->bundle) {
-    }
 
-    return;
-
-    if ($this->bundle && $entity_info['entity keys']['bundle']) {
-      $query->entityCondition('bundle', $this->getBundle());
-    }
+    // todo: fix.
+//    if ($this->bundle && $entity_info['entity keys']['bundle']) {
+//      $query->entityCondition('bundle', $this->getBundle());
+//    }
 
     $public_fields = $this->getPublicFields();
+
+    dpm($public_fields);
+
+    return;
 
     $sorts = array();
     if (!empty($request['sort'])) {
@@ -607,7 +616,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       // Sort by default using the entity ID.
       $sorts['id'] = 'ASC';
     }
-
     foreach ($sorts as $sort => $direction) {
       // Determine if sorting is by field or property.
       if (empty($public_fields[$sort]['column'])) {
@@ -1558,15 +1566,13 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    */
   public function getPublicFields() {
     $public_fields = $this->publicFields;
-
-    $entity_info = entity_get_info($this->getEntityType());
-    $id_key = $entity_info['entity keys']['id'];
+    $entity_info = $this->getEntityDefinition();
 
     $public_fields += array(
       'id' => array(
         'wrapper_method' => 'getIdentifier',
         'wrapper_method_on_entity' => TRUE,
-        'property' => $id_key,
+        'property' => $entity_info->getKey('id'),
       ),
       'label' => array(
         'wrapper_method' => 'label',
@@ -1575,8 +1581,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       'self' => array('property' => 'url'),
     );
 
-    if (!empty($entity_info['entity keys']['label'])) {
-      $public_fields['label']['property'] = $entity_info['entity keys']['label'];
+    if ($label = $entity_info->getKey('label')) {
+      $public_fields['label']['property'] = $label;
     }
 
     return $public_fields;
