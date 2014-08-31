@@ -545,24 +545,20 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       return $this->getListForAutocomplete();
     }
 
-    $entity_type = $this->entityType;
-    $result = $this
-      ->getQueryForList();
-//      ->execute();
+    $ids = $this
+      ->getQueryForList()
+      ->execute();
 
-
-    if (empty($result[$entity_type])) {
-      return array();
+    if (empty($ids)) {
+      return;
     }
 
-    $ids = array_keys($result[$entity_type]);
-
+    // todo: fix.
     // Pre-load all entities if there is no render cache.
-    $cache_info = $this->getPluginInfo('cache');
-    if (!$cache_info['render']) {
-      entity_load($entity_type, $ids);
-    }
-
+//    $cache_info = $this->getPluginInfo('cache');
+//    if (!$cache_info['render']) {
+      entity_load_multiple($this->getEntityDefinition()->id(), $ids);
+//    }
     $return = array('list' => array());
 
     $this->getListAddHateoas($return, $ids);
@@ -570,7 +566,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     foreach ($ids as $id) {
       $return['list'][] = $this->viewEntity($id);
     }
-
     return $return;
   }
 
@@ -594,12 +589,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
 //    }
 
     $public_fields = $this->getPublicFields();
-
-    dpm($public_fields);
-
-    return;
-
-    $sorts = array();
     if (!empty($request['sort'])) {
       foreach (explode(',', $request['sort']) as $sort) {
         $direction = $sort[0] == '-' ? 'DESC' : 'ASC';
@@ -616,16 +605,12 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       // Sort by default using the entity ID.
       $sorts['id'] = 'ASC';
     }
+
     foreach ($sorts as $sort => $direction) {
       // Determine if sorting is by field or property.
-      if (empty($public_fields[$sort]['column'])) {
-        $query->propertyOrderBy($public_fields[$sort]['property'], $direction);
-      }
-      else {
-        $query->fieldOrderBy($public_fields[$sort]['property'], $public_fields[$sort]['column'], $direction);
-      }
+      // todo: fix.
+      $query->sort($public_fields[$sort]['property'], $direction);
     }
-
 
     // Determine the page that should be seen. Page 1, is actually offset 0
     // in the query range.
@@ -644,7 +629,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     $query->addTag($entity_type . '_access');
     $query->addTag('restful');
     $query->addMetaData('restful_handler', $this);
-    $query->addMetaData('account', $this->getAccount());
+    // todo: fix.
+//    $query->addMetaData('account', $this->getAccount());
 
     $query->range($offset, $range);
 
@@ -806,6 +792,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @throws Exception
    */
   public function viewEntity($entity_id) {
+    // todo: continue from here.
     $account = $this->getAccount();
     $request = $this->getRequest();
 
@@ -1620,6 +1607,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   The user object.
    */
   public function getAccount() {
+    // todo: fix.
+    return \Drupal::currentUser()->getAccount();
     $request = $this->getRequest();
     $method = $this->getMethod();
 

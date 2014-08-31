@@ -64,9 +64,7 @@ class RestfulEntityBaseUser extends RestfulEntityBase {
    * Skip the anonymous user in listing.
    */
   public function getQueryForList() {
-    $query = parent::getQueryForList();
-    return;
-    $query->entityCondition('entity_id', 0, '>');
-    return $query;
+    return parent::getQueryForList()
+      ->condition($this->getEntityDefinition()->getKey('id'), 0, '>');
   }
 }
