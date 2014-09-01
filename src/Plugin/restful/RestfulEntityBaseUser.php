@@ -41,6 +41,10 @@ class RestfulEntityBaseUser extends RestfulEntityBase {
       'property' => 'mail',
     );
 
+    $public_fields['label'] = array(
+      'property' => 'name',
+    );
+
     return $public_fields;
   }
 

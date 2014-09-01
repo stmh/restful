@@ -10,6 +10,7 @@ use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulForbiddenException;
@@ -793,7 +794,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @throws Exception
    */
   public function viewEntity($entity_id) {
-    // todo: continue from here.
     $account = $this->getAccount();
     $request = $this->getRequest();
 
@@ -815,9 +815,6 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
         continue;
       }
 
-      dpm($info, $public_property);
-
-      continue;
       // Set default values.
       $info += array(
         'property' => FALSE,
@@ -835,70 +832,40 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
         // Calling a callback to receive the value.
         if (!is_callable($info['callback'])) {
           $callback_name = is_array($info['callback']) ? $info['callback'][1] : $info['callback'];
-          throw new Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
+          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
         }
 
-        $value = call_user_func($info['callback'], $wrapper);
+        $value = call_user_func($info['callback'], $entity);
       }
       else {
         // Exposing an entity field.
         $property = $info['property'];
 
-        $sub_wrapper = $info['wrapper_method_on_entity'] ? $wrapper : $wrapper->{$property};
-
         // Check user has access to the property.
-        if ($property && !$this->checkPropertyAccess($sub_wrapper, 'view', $wrapper)) {
+        if ($entity->get($property) && !$this->access($property, 'view', $this->getAccount())) {
           continue;
         }
 
-        $method = $info['wrapper_method'];
-        $resource = $info['resource'];
-
-        if ($sub_wrapper instanceof EntityListWrapper) {
-          // Multiple value.
-          foreach ($sub_wrapper as $item_wrapper) {
-            if ($info['sub_property'] && $item_wrapper->value()) {
-              $item_wrapper = $item_wrapper->{$info['sub_property']};
-            }
-
-            if ($resource) {
-              if ($value_from_resource = $this->getValueFromResource($item_wrapper, $property, $resource)) {
-                $value[] = $value_from_resource;
-              }
-            }
-            else {
-              // Wrapper method.
-              $value[] = $item_wrapper->{$method}();
-            }
-          }
-        }
-        else {
-          // Single value.
-          if ($info['sub_property'] && $sub_wrapper->value()) {
-            $sub_wrapper = $sub_wrapper->{$info['sub_property']};
-          }
-
-          if ($resource) {
-            $value = $this->getValueFromResource($sub_wrapper, $property, $resource);
-          }
-          else {
-            // Wrapper method.
-            $value = $sub_wrapper->{$method}();
-          }
-        }
+        /** @var FieldItemList $field */
+        $value = $entity->get($property)->value;
       }
 
-      if ($value && $info['process_callback']) {
-        if (!is_callable($info['process_callback'])) {
-          $callback_name = is_array($info['process_callback']) ? $info['process_callback'][1] : $info['process_callback'];
-          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
-        }
-
-        $value = call_user_func($info['process_callback'], $value);
-      }
+//      if ($value && $info['process_callback']) {
+//        if (!is_callable($info['process_callback'])) {
+//          $callback_name = is_array($info['process_callback']) ? $info['process_callback'][1] : $info['process_callback'];
+//          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
+//        }
+//
+//        $value = call_user_func($info['process_callback'], $value);
+//      }
 
       $values[$public_property] = $value;
     }
+
+    // not working... check why.
+    dpm('a');
+
+    dpm($values);
 
     $this->setRenderedEntityCache($values, $entity_id);
     return $values;
