@@ -10,6 +10,7 @@ use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulForbiddenException;
 use Drupal\restful\Exception\RestfulGoneException;
@@ -803,7 +804,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
 
     $this->isValidEntity('view', $entity_id);
 
-    $wrapper = entity_metadata_wrapper($this->entityType, $entity_id);
+    $entity = entity_load($this->getEntityDefinition()->id(), $entity_id);
     $values = array();
 
     $limit_fields = !empty($request['fields']) ? explode(',', $request['fields']) : array();
@@ -814,6 +815,9 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
         continue;
       }
 
+      dpm($info, $public_property);
+
+      continue;
       // Set default values.
       $info += array(
         'property' => FALSE,
@@ -1503,25 +1507,25 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    */
   protected function isValidEntity($op, $entity_id) {
     $account = $this->getAccount();
-    $entity_type = $this->entityType;
+    $entity_type = $this->getEntityDefinition()->id();
 
     $params = array(
       '@id' => $entity_id,
       '@resource' => $this->plugin['label'],
     );
 
-    if (!$entity = entity_load_single($entity_type, $entity_id)) {
+    if (!$entity = entity_load($entity_type, $entity_id)) {
       throw new RestfulUnprocessableEntityException(format_string('The entity ID @id for @resource does not exist.', $params));
     }
 
-    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+    $bundle = $entity->bundle();
 
     $resource_bundle = $this->getBundle();
     if ($resource_bundle && $bundle != $resource_bundle) {
       throw new RestfulUnprocessableEntityException(format_string('The entity ID @id is not a valid @resource.', $params));
     }
 
-    if ($this->checkEntityAccess($op, $entity_type, $entity) === FALSE) {
+    if ($this->checkEntityAccess($op, $entity) === FALSE) {
       // Entity was explicitly denied.
       throw new RestfulForbiddenException(format_string('You do not have access to entity ID @id of resource @resource', $params));
     }
@@ -1543,9 +1547,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   TRUE or FALSE based on the access. If no access is known about the entity
    *   return NULL.
    */
-  protected function checkEntityAccess($op, $entity_type, $entity) {
-    $account = $this->getAccount();
-    return entity_access($op, $entity_type, $entity, $account);
+  protected function checkEntityAccess($op, EntityInterface $entity) {
+    return $entity->access($op, $this->getAccount());
   }
 
   /**
@@ -1603,7 +1606,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @param string $method
    *   The HTTP method. Defaults to "get".
    *
-   * @return \stdClass
+   * @return AccountInterface
    *   The user object.
    */
   public function getAccount() {
