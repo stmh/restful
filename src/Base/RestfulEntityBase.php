@@ -489,7 +489,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       $this->getRateLimitManager()->checkRateLimit($request);
     }
 
-    $this->{$method_name}($path);
+    return $this->{$method_name}($path);
   }
 
   /**
@@ -568,6 +568,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     foreach ($ids as $id) {
       $return['list'][] = $this->viewEntity($id);
     }
+
     return $return;
   }
 
@@ -810,46 +811,43 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     $limit_fields = !empty($request['fields']) ? explode(',', $request['fields']) : array();
 
     foreach ($this->getPublicFields() as $public_property => $info) {
-      if ($limit_fields && !in_array($public_property, $limit_fields)) {
-        // Limit fields doesn't include this property.
-        continue;
-      }
-
-      // Set default values.
-      $info += array(
-        'property' => FALSE,
-        'wrapper_method' => 'value',
-        'wrapper_method_on_entity' => FALSE,
-        'sub_property' => FALSE,
-        'process_callback' => FALSE,
-        'callback' => FALSE,
-        'resource' => array(),
-      );
-
-      $value = NULL;
-
-      if ($info['callback']) {
-        // Calling a callback to receive the value.
-        if (!is_callable($info['callback'])) {
-          $callback_name = is_array($info['callback']) ? $info['callback'][1] : $info['callback'];
-          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
-        }
-
-        $value = call_user_func($info['callback'], $entity);
-      }
-      else {
-        // Exposing an entity field.
-        $property = $info['property'];
-
-        // Check user has access to the property.
-        if ($entity->get($property) && !$this->access($property, 'view', $this->getAccount())) {
-          continue;
-        }
-
-        /** @var FieldItemList $field */
-        $value = $entity->get($property)->value;
-      }
-
+//      if ($limit_fields && !in_array($public_property, $limit_fields)) {
+//        // Limit fields doesn't include this property.
+//        continue;
+//      }
+//
+//      // Set default values.
+//      $info += array(
+//        'property' => FALSE,
+//        'wrapper_method' => 'value',
+//        'wrapper_method_on_entity' => FALSE,
+//        'sub_property' => FALSE,
+//        'process_callback' => FALSE,
+//        'callback' => FALSE,
+//        'resource' => array(),
+//      );
+//
+//      $value = NULL;
+//
+//      if ($info['callback']) {
+//        // Calling a callback to receive the value.
+//        if (!is_callable($info['callback'])) {
+//          $callback_name = is_array($info['callback']) ? $info['callback'][1] : $info['callback'];
+//          throw new \Exception(format_string('Process callback function: @callback does not exists.', array('@callback' => $callback_name)));
+//        }
+//
+//        $value = call_user_func($info['callback'], $entity);
+//      }
+//      else {
+//        // Exposing an entity field.
+//        $property = $info['property'];
+//
+//        if ($entity->get($property) && !$this->access($property, 'view', $this->getAccount())) {
+//          continue;
+//        }
+//
+//      }
+//
 //      if ($value && $info['process_callback']) {
 //        if (!is_callable($info['process_callback'])) {
 //          $callback_name = is_array($info['process_callback']) ? $info['process_callback'][1] : $info['process_callback'];
@@ -859,13 +857,23 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
 //        $value = call_user_func($info['process_callback'], $value);
 //      }
 
-      $values[$public_property] = $value;
+//      $values[$public_property] = $entity->get($public_property)->value;
+//      if (!$value = $entity->get($info['property'])->getValue()) {
+//        continue;
+//      }
+//
+      $property = $info['property'];
+      if (!$entity->hasField($property)) {
+        continue;
+      }
+
+      // Check user has access to the property.
+      if (!$entity->get($property)->access('view', $account)) {
+        continue;
+      }
+
+      $values[$property] = $entity->get($property)->getString();
     }
-
-    // not working... check why.
-    dpm('a');
-
-    dpm($values);
 
     $this->setRenderedEntityCache($values, $entity_id);
     return $values;

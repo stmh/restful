@@ -157,7 +157,6 @@ class Restful {
       }
 
       $response->headers->set('Content-Type', 'application/hal+json; charset=utf-8');
-      return $result;
     }
     catch (RestfulException $e) {
       $result = array(
@@ -184,9 +183,10 @@ class Restful {
     }
 
     // Adhere to the API Problem draft proposal.
-    $response->headers->set('Status', $var['status']);
+    // todo: fix.
+//    $response->headers->set('Status', $var['status']);
     $response->headers->set('Content-Type', 'application/problem+json; charset=utf-8');
-    return $result;
+    return new JsonResponse($result);
   }
 
   /**
