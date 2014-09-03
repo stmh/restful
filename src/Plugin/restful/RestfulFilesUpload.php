@@ -23,17 +23,13 @@ use Drupal\restful\Exception\RestfulUnauthorizedException;
 //}
 
 /**
- *
- * todo: change the hook_menu back to false when done.
- *
  * @Restful(
  *  id = "file_upload-1.0",
  *  label = @Translation("File upload"),
  *  description = @Translation("A file upload wrapped with RESTful."),
  *  resource = "files",
  *  entity_type = "file",
- *  authentication_types = TRUE,
- *  hook_menu = TRUE
+ *  authentication_types = TRUE
  * )
  */
 class RestfulFilesUpload extends RestfulEntityBase {
