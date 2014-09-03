@@ -1,0 +1,7 @@
+name: RESTful example
+description: Example module for the RESTful module.
+core: 8.x
+type: module
+
+dependencies:
+ - restful
