@@ -8,22 +8,16 @@ namespace Drupal\restful_example\Plugin\Restful;
 
 use Drupal\restful\Base\RestfulEntityBaseNode;
 
-$plugin = array(
-  'label' => t('Articles'),
-  'resource' => 'articles',
-  'name' => 'articles__1_1',
-  'entity_type' => 'node',
-  'bundle' => 'article',
-  'description' => t('Export the article content type.'),
-  'class' => 'RestfulExampleArticlesResource__1_1',
-  // Set the minor version.
-  'minor_version' => 1,
-);
-
-
 /**
  * @Restful(
- *  id = "node-article-1.1",
+ *  id = 'node-article-1.1',
+ *  name = articles__1_1,
+ *  label = @Translation('Articles'),
+ *  description = @Translation('Export the article content type.'),
+ *  resource = 'articles',
+ *  entity_type = 'node',
+ *  bundle = 'articles',
+ *  minor_version = 1
  * )
  */
 class NodeArticle11 extends RestfulEntityBaseNode {

@@ -8,32 +8,28 @@ namespace Drupal\restful_example\Plugin\Restful;
 
 use Drupal\restful\Base\RestfulEntityBaseNode;
 
-if (\Drupal::moduleHandler()->moduleExists('restful_token_auth')) {
-
-  $plugin = array(
-    'label' => t('Articles'),
-    'resource' => 'articles',
-    'name' => 'articles__1_3',
-    'entity_type' => 'node',
-    'bundle' => 'article',
-    'description' => t('Export the article content type with "token" authentication.'),
-    'class' => 'RestfulExampleArticlesResource',
-    // Set the minor version.
-    'minor_version' => 3,
-    // Set the authentication to token.
-    'authentication_types' => array(
-      'token',
-    ),
-  );
-
-}
-
-
 /**
  * @Restful(
- *  id = "node-article-1.3",
+ *  id = 'node-article-1.3',
+ *  name = 'articles__1_3',
+ *  label = @Translation('Articles'),
+ *  description = @Translation('Export the article content type with "token" authentication.'),
+ *  resource = 'articles',
+ *  entity_type = 'node',
+ *  bundle = 'article',
+ *  minor_version = 3,
+ *  authentication_types = {
+ *    'token',
+ *  }
  * )
  */
 class NodeArticle13 extends RestfulEntityBaseNode {
 
+
+  /**
+   * Overrides RestfulEntityBaseNode::access().
+   */
+  public function access() {
+    return \Drupal::moduleHandler()->moduleExists('restful_token_auth');
+  }
 }

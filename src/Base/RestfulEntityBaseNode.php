@@ -8,6 +8,7 @@
 namespace Drupal\restful\Base;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * A base implementation for "Node" entity type.
@@ -21,7 +22,7 @@ class RestfulEntityBaseNode extends RestfulEntityBase {
    */
   public function getQueryForList() {
     $query = parent::getQueryForList();
-    $query->propertyCondition('status', NODE_PUBLISHED);
+    $query->condition('status', NODE_PUBLISHED);
     return $query;
   }
 
@@ -30,14 +31,12 @@ class RestfulEntityBaseNode extends RestfulEntityBase {
    *
    * Set the node author and other defaults.
    */
-  public function entityPreSave(EntityInterface $wrapper) {
-    $node = $wrapper->value();
-    if (!empty($node->nid)) {
-      // Node is already saved.
+  public function entityPreSave(NodeInterface $node) {
+    if (!$node->id()) {
       return;
     }
-    node_object_prepare($node);
-    $node->uid = $this->getAccount()->uid;
+
+    $node->setOwner($this->getAccount());
   }
 
 }

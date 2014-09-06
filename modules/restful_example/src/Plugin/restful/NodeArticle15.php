@@ -8,23 +8,18 @@ namespace Drupal\restful_example\Plugin\Restful;
 
 use Drupal\restful\Base\RestfulEntityBaseNode;
 
-$plugin = array(
-  'label' => t('Articles'),
-  'resource' => 'articles',
-  'name' => 'articles__1_5',
-  'entity_type' => 'node',
-  'bundle' => 'article',
-  'description' => t('Export the article content type with "cookie" authentication.'),
-  'class' => 'RestfulExampleArticlesResource__1_5',
-  'authentication_types' => TRUE,
-  'authentication_optional' => TRUE,
-  'minor_version' => 5,
-);
-
-
 /**
  * @Restful(
  *  id = "node-article-1.5",
+ *  label = @Translation('Article'),
+ *  description = @Translation('Export the article content type with "cookie" authentication.),
+ *  resource = 'articles',
+ *  name = 'articles__1_5',
+ *  entity_type = 'node',
+ *  bundle = 'articles',
+ *  authentication_types = TRUE,
+ *  authentication_optional = TRUE,
+ *  minor_version = 5
  * )
  */
 class NodeArticle15 extends RestfulEntityBaseNode {
@@ -74,5 +69,4 @@ class NodeArticle15 extends RestfulEntityBaseNode {
       'height' => $value['height'],
     );
   }
-
 }
