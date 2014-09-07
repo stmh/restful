@@ -12,38 +12,21 @@ use Drupal\restful\Base\RestfulInterface;
 /**
  * @Restful(
  *  id = "pre_role_content",
- *  label = @Translation('Content per role'),
- *  description = @Translation('Get a list of all the nodes authored by users with the administration role.'),
- *  resource = 'per_role_content',
- *  name = 'per_role_content__1_0',
- *  entity_type = 'node',
- *  bundle = 'article',
- *  # Authentication is optional, many resources are available to anonymous
- *  # users. Current authentication types are:
- *  #   - 'cookie': Uses regular Drupal session.
- *  #   - 'basic_auth': Uses basic auth credentials.
- *  #   - 'token': Use any of the methods above to get a valid token. Once you
- *  #     have a valid token use it to authenticate.
+ *  label = @Translation("Content per role"),
+ *  description = @Translation("Get a list of all the nodes authored by users with the administration role."),
+ *  resource = "per_role_content",
+ *  name = "per_role_content__1_0",
+ *  entity_type = "node",
+ *  bundle = "article",
  *  authentication_types = {
- *    'cookie'
+ *    "cookie"
  *  },
  *  options = {
- *    # This will be populated automatically in the 'get children' callback for
- *    # every child plugin.
- *    roles = {
+ *    "roles" = {
  *    }
  *  },
- *  # Callback function that will return modified instances of this plugin. Use
- *  # this as a way to provide a basic plugin in code and generate as many
- *  # plugins as you need. This is mostly used for plugins that store some of
- *  # their information in the database, such as views, blocks or exportable
- *  # custom versions of plugins.
- *  'get children' = 'PerRoleContent::getChildren',
- *
- *  # To implement, each plugin can have a 'get child' and 'get children'
- *  # callback. Both of these should be implemented for performance reasons,
- *  # since it is best to avoid getting all children if necessary.
- *  'get child' = 'PerRoleContent::getChild'
+ *  get_children = "PerRoleContent::getChildren",
+ *  get_child = "PerRoleContent::getChild"
  * )
  */
 class PerRoleContent extends RestfulEntityBase {

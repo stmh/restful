@@ -6,11 +6,11 @@
  */
 
 namespace Drupal\restful\Base;
+
 use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
-use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\restful\Exception\RestfulBadRequestException;
 use Drupal\restful\Exception\RestfulForbiddenException;
@@ -121,7 +121,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Cache controller object.
    *
-   * @var \DrupalCacheInterface
+   * @var CacheBackendInterface
    */
   protected $cacheController;
 
@@ -305,7 +305,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   /**
    * Getter for $cacheController.
    *
-   * @return \DrupalCacheInterface
+   * @return CacheBackendInterface
    */
   public function getCacheController() {
     return $this->cacheController;

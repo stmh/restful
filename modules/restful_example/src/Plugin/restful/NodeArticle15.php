@@ -11,12 +11,12 @@ use Drupal\restful\Base\RestfulEntityBaseNode;
 /**
  * @Restful(
  *  id = "node-article-1.5",
- *  label = @Translation('Article'),
- *  description = @Translation('Export the article content type with "cookie" authentication.),
- *  resource = 'articles',
- *  name = 'articles__1_5',
- *  entity_type = 'node',
- *  bundle = 'articles',
+ *  label = @Translation("Article"),
+ *  description = @Translation("Export the article content type with 'cookie' authentication."),
+ *  resource = "articles",
+ *  name = "articles__1_5",
+ *  entity_type = "node",
+ *  bundle = "articles",
  *  authentication_types = TRUE,
  *  authentication_optional = TRUE,
  *  minor_version = 5
