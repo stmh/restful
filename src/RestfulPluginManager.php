@@ -28,9 +28,8 @@ class RestfulPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/restful', $namespaces, $module_handler, 'Drupal\restful\Annotation\Restful');
+    parent::__construct('Plugin/restful', $namespaces, $module_handler, NULL, 'Drupal\restful\Annotation\Restful');
     $this->alterInfo('restful_restful_alter');
     $this->setCacheBackend($cache_backend, 'restful_restful');
   }
-
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\restful\Controller;
 
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\restful\Base\RestfulAuthenticationInterface;
 use Drupal\restful\Base\RestfulEntityInterface;
 use Drupal\restful\Base\RestfulInterface;
@@ -98,6 +99,9 @@ class Restful {
    * @param string $api
    *   When initialising a plugin, by providing a plugin name, you can select
    *   the number of the API number. Default set to 1.0
+   *
+   * @return Array|PluginBase
+   *   A restful/rate limit/authentication plugin instance.
    */
   private static function GetPlugins($service, $plugin_name = NULL, $api = "1.0") {
     $service = \Drupal::service($service);
