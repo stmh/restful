@@ -30,7 +30,7 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     foreach ($plugins as $plugin) {
 
-      if (!$plugin['hook_menu']) {
+      if (!isset($plugin['hook_menu'])) {
         continue;
       }
 
@@ -38,15 +38,18 @@ class RouteSubscriber extends RouteSubscriberBase {
         // Set a default menu item.
         // todo: set to 'api/%'.
         $base_path = $config->get('hook_menu_base_path') ? : 'api/{api}/{resource}';
-
-        $route = new Route(
-          $base_path,
-          array('_content' => 'Drupal\restful\Controller\Restful::JsonOutput'),
-          array('_restful_restful' => 'TRUE')
-        );
-
-        $collection->add('restful.' . $plugin['id'], $route);
       }
+      else {
+        $base_path = $plugin['menu_item'];
+      }
+
+      $route = new Route(
+        $base_path,
+        array('_content' => 'Drupal\restful\Controller\Restful::JsonOutput'),
+        array('_restful_restful' => 'TRUE')
+      );
+
+      $collection->add('restful.' . $plugin['id'], $route);
     }
 
     return;
