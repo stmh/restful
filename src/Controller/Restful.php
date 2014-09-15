@@ -8,6 +8,7 @@ use Drupal\restful\Base\RestfulEntityInterface;
 use Drupal\restful\Base\RestfulInterface;
 use Drupal\restful\Base\RestfulRateLimitInterface;
 use Drupal\restful\Exception\RestfulException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -129,12 +130,22 @@ class Restful {
    *
    * @see restful_menu_process_callback()
    */
-  public static function JsonOutput($api, $resource) {
+  public static function JsonOutput($api = '', $resource = '') {
     $response = new Response();
 
-    $major_version = intval(str_replace('v', '', $api));
-    $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_int($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
-    $plugin = Restful::RestfulPlugins($resource, $major_version . '.' . $minor_version);
+    if (!$api && $resource) {
+      if (!$plugin = self::getPluginByRouterName(\Drupal::routeMatch()->getRouteName())) {
+        // todo: check why this not return the initialized plugin.
+        return;
+      }
+    }
+    else {
+      $major_version = intval(str_replace('v', '', $api));
+      $minor_version = !empty($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) && is_int($_SERVER['HTTP_X_RESTFUL_MINOR_VERSION']) ? $_SERVER['HTTP_X_RESTFUL_MINOR_VERSION'] : 0;
+      $plugin = Restful::RestfulPlugins($resource, $major_version . '.' . $minor_version);
+    }
+
+    return;
 
     $path = func_get_args();
     unset($path[0], $path[1]);
@@ -230,35 +241,34 @@ class Restful {
   }
 
   /**
-   * Get the plugin id by the menu item. When the API and the resource are not
-   * supplied we need find the plugin by according to the menu item.
+   * Get the plugin id by the router name. When the API and the resource are not
+   * supplied we need find the plugin by according to the router name.
    *
-   * @param String $path
-   *   The path for the menu item.
+   * @param String $router
+   *   The name of the router.
    *
    * @return RestfulEntityInterface|NULL
    *   The initialized plugin when found. If not, return NULL.
    */
-  public static function getPluginByPath($path) {
-    // API version and resource empty. Check if there any plugin that define
-    // the current menu. If not return access deny.
-    $plugins = Restful::RestfulPlugins();
+  public static function getPluginByRouterName($router) {
+    // Remove the restful prefix.
+    $plugin_id = str_replace('restful.', '', $router);
+    $exploded = explode('-', $plugin_id);
 
-    foreach ($plugins as $plugin) {
-      if (!isset($plugin['hook_menu'])) {
-        continue;
-      }
-
-      if (!isset($plugin['menu_item'])) {
-        continue;
-      }
-
-      if ('/' . $plugin['menu_item'] == $path) {
-        $id = explode('-', $plugin['id']);
-        return Restful::RestfulPlugins($id[0] . '-' . $id[1], $id[2]);
-      }
+    if (!$plugin = self::RestfulPlugins($exploded[0] . '-' . $exploded[1], $exploded[2])) {
+      return;
     }
 
-    return NULL;
+    $definitions = $plugin->getPluginDefinition();
+
+    if (!isset($definitions['hook_menu'])) {
+      return;
+    }
+
+    if (!isset($definitions['menu_item'])) {
+      return;
+    }
+
+    return $plugin;
   }
 }

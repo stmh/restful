@@ -44,7 +44,7 @@ class RestfulAccessCheck implements AccessInterface {
   public function access(Route $route, Request $request, AccountInterface $account, $api = '', $resource = '') {
 
     if (!$api && !$resource) {
-      if ($plugin = Restful::getPluginByPath($request->getPathInfo())) {
+      if ($plugin = Restful::getPluginByRouterName(\Drupal::routeMatch()->getRouteName())) {
         return $plugin->access();
       }
 
