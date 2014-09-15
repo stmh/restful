@@ -228,4 +228,37 @@ class Restful {
 
     return $request;
   }
+
+  /**
+   * Get the plugin id by the menu item. When the API and the resource are not
+   * supplied we need find the plugin by according to the menu item.
+   *
+   * @param String $path
+   *   The path for the menu item.
+   *
+   * @return RestfulEntityInterface|NULL
+   *   The initialized plugin when found. If not, return NULL.
+   */
+  public static function getPluginByPath($path) {
+    // API version and resource empty. Check if there any plugin that define
+    // the current menu. If not return access deny.
+    $plugins = Restful::RestfulPlugins();
+
+    foreach ($plugins as $plugin) {
+      if (!isset($plugin['hook_menu'])) {
+        continue;
+      }
+
+      if (!isset($plugin['menu_item'])) {
+        continue;
+      }
+
+      if ('/' . $plugin['menu_item'] == $path) {
+        $id = explode('-', $plugin['id']);
+        return Restful::RestfulPlugins($id[0] . '-' . $id[1], $id[2]);
+      }
+    }
+
+    return NULL;
+  }
 }

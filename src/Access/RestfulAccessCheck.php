@@ -44,23 +44,8 @@ class RestfulAccessCheck implements AccessInterface {
   public function access(Route $route, Request $request, AccountInterface $account, $api = '', $resource = '') {
 
     if (!$api && !$resource) {
-      // API version and resource empty. Check if there any plugin that define
-      // the current menu. If not return access deny.
-      $plugins = Restful::RestfulPlugins();
-      dpm($request->getPathInfo());
-
-      foreach ($plugins as $plugin) {
-        if (!isset($plugin['hook_menu'])) {
-          continue;
-        }
-
-        if (!isset($plugin['menu_item'])) {
-          continue;
-        }
-
-        if ('/' . $plugin['menu_item'] == $request->getPathInfo()) {
-          // todo: Initialize the plugin and check the access method.
-        }
+      if ($plugin = Restful::getPluginByPath($request->getPathInfo())) {
+        return $plugin->access();
       }
 
       return static::DENY;
