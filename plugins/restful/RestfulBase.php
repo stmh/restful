@@ -8,6 +8,14 @@
 abstract class RestfulBase implements RestfulInterface {
 
   /**
+   * Nested array that provides information about what method to call for each
+   * route pattern.
+   *
+   * @var array $controllers
+   */
+  protected $controllers = array();
+
+  /**
    * The plugin definition.
    *
    * @var array $plugin
@@ -133,12 +141,58 @@ abstract class RestfulBase implements RestfulInterface {
   }
 
   /**
+   * Returns the default controllers for the entity.
+   *
+   * @return array
+   *   Nested array that provides information about what method to call for each
+   *   route pattern.
+   */
+  public static function controllersInfo() {
+    return array(
+      '' => array(
+        // Return the value from the non-entity resource.
+        \RestfulInterface::GET => 'viewNonEntityResourceValue',
+      ),
+    );
+  }
+
+  /**
+   * Return the value of the non-entity resource.
+   *
+   * @return array
+   *   Array with the public fields populated.
+   */
+  protected function viewNonEntityResourceValue() {
+    foreach ($this->getPublicFields() as $public_property => $info) {
+      $value = NULL;
+
+      if ($info['callback']) {
+        $value = static::executeCallback($info['callback']);
+      }
+
+      if ($value && $info['process_callbacks']) {
+        foreach ($info['process_callbacks'] as $process_callback) {
+          $value = static::executeCallback($process_callback, array($value));
+        }
+      }
+
+      $values[$public_property] = $value;
+    }
+
+    return $values;
+  }
+
+  /**
    * Get the defined controllers
    *
    * @return array
    *   The defined controllers.
    */
   public function getControllers() {
+    if (!empty($this->controllers)) {
+      return $this->controllers;
+    }
+    $this->controllers = static::controllersInfo();
     return $this->controllers;
   }
 
@@ -305,7 +359,7 @@ abstract class RestfulBase implements RestfulInterface {
    *   The formatted output.
    */
   public function format(array $data) {
-    $formatter_handler = restful_get_formatter_handler($this->getPluginInfo('formatter'), $this);
+    $formatter_handler = restful_output_format($this);
     return $formatter_handler->format($data);
   }
 
@@ -381,6 +435,22 @@ abstract class RestfulBase implements RestfulInterface {
    */
   public function get($path = '', array $request = array()) {
     return $this->process($path, $request, \RestfulInterface::GET);
+  }
+
+  /**
+   * Call resource using the GET http method.
+   *
+   * @param string $path
+   *   (optional) The path.
+   * @param array $request
+   *   (optional) The request.
+   *
+   * @return mixed
+   *   The return value can depend on the controller for the get method.
+   */
+  public function head($path = '', array $request = array()) {
+    $this->process($path, $request, \RestfulInterface::HEAD);
+    return NULL;
   }
 
   /**
@@ -494,6 +564,16 @@ abstract class RestfulBase implements RestfulInterface {
 
       // We found the controller, so we can break.
       $selected_controller = $controllers[$method];
+      if (is_array($selected_controller)) {
+        // If there is a custom access method for this endpoint check it.
+        if (!empty($selected_controller['access callback']) && !static::executeCallback(array($this, $selected_controller['access callback']), array($path))) {
+          throw new \RestfulForbiddenException(format_string('You do not have access to this endpoint: @method - @path', array(
+            '@method' => $method,
+            '@path' => $path,
+          )));
+        }
+        $selected_controller = $selected_controller['callback'];
+      }
       break;
     }
 
@@ -510,6 +590,23 @@ abstract class RestfulBase implements RestfulInterface {
     // Add a generic tags to the query.
     $query->addTag('restful');
     $query->addMetaData('account', $this->getAccount());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPublicFields() {
+    $public_fields = $this->publicFieldsInfo();
+    // Set defaults values.
+    foreach (array_keys($public_fields) as $key) {
+      // Set default values.
+      $info = &$public_fields[$key];
+      $info += array(
+        'process_callbacks' => array(),
+        'callback' => FALSE,
+      );
+    }
+    return $public_fields;
   }
 
   /**

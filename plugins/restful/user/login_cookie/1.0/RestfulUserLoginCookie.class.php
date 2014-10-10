@@ -8,15 +8,15 @@
 class RestfulUserLoginCookie extends \RestfulEntityBase {
 
   /**
-   * Overrides \RestfulEntityBase::controllers
-   *
-   * @var array
+   * Overrides \RestfulBase::controllersInfo().
    */
-  protected $controllers = array(
-    '' => array(
-      \RestfulInterface::GET => 'loginAndRespondWithCookie',
-    ),
-  );
+  public static function controllersInfo() {
+    return array(
+      '' => array(
+        \RestfulInterface::GET => 'loginAndRespondWithCookie',
+      ),
+    );
+  }
 
   /**
    * Login a user and return a JSON along with the authentication cookie.
@@ -32,7 +32,7 @@ class RestfulUserLoginCookie extends \RestfulEntityBase {
     $version = $this->getVersion();
     $handler = restful_get_restful_handler('users', $version['major'], $version['minor']);
 
-    $output = $handler->viewEntity($account->uid);
+    $output = $handler ? $handler->viewEntity($account->uid) : array();
     $output += restful_csrf_session_token();
     return $output;
   }

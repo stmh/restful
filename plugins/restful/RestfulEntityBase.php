@@ -45,8 +45,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   in queries. For example, the default column for a text field would be
    *   "value". Defaults to the first column returned by field_info_field(),
    *   otherwise FALSE.
-   * - "callback": A callable callback to get a computed value. Defaults To
-   *   FALSE.
+   * - "callback": A callable callback to get a computed value. The wrapped
+   *   entity is passed as argument. Defaults To FALSE.
    *   The callback function receive as first argument the entity
    *   EntityMetadataWrapper object.
    * - "process_callbacks": An array of callbacks to perform on the returned
@@ -57,35 +57,23 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    *   "Page" bundles, we are able to map those bundles to their related
    *   resource. Items with bundles that were not explicitly set would be
    *   ignored.
+   *   It is also possible to pass an array as the value, with:
+   *   - "name": The resource name.
+   *   - "full_view": Determines if the referenced resource should be rendered,
+   *   or just the referenced ID(s) to appear. Defaults to TRUE.
    *   array(
+   *     // Shorthand.
    *     'article' => 'articles',
-   *     'page' => 'pages',
+   *     // Verbose
+   *     'page' => array(
+   *       'name' => 'pages',
+   *       'full_view' => FALSE,
+   *     ),
    *   );
    *
    * @var array
    */
   protected $publicFields = array();
-
-  /**
-   * Nested array that provides information about what method to call for each
-   * route pattern.
-   *
-   * @var array $controllers
-   */
-  protected $controllers = array(
-    '' => array(
-      // GET returns a list of entities.
-      \RestfulInterface::GET => 'getList',
-      // POST
-      \RestfulInterface::POST => 'createEntity',
-    ),
-    '^(\d+,)*\d+$' => array(
-      \RestfulInterface::GET => 'viewEntities',
-      \RestfulInterface::PUT => 'putEntity',
-      \RestfulInterface::PATCH => 'patchEntity',
-      \RestfulInterface::DELETE => 'deleteEntity',
-    ),
-  );
 
   /**
    * Determines the number of items that should be returned when viewing lists.
@@ -129,6 +117,28 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    */
   public function getEntityType() {
     return $this->entityType;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function controllersInfo() {
+    return array(
+      '' => array(
+        // GET returns a list of entities.
+        \RestfulInterface::GET => 'getList',
+        \RestfulInterface::HEAD => 'getList',
+        // POST
+        \RestfulInterface::POST => 'createEntity',
+      ),
+      '^(\d+,)*\d+$' => array(
+        \RestfulInterface::GET => 'viewEntities',
+        \RestfulInterface::HEAD => 'viewEntities',
+        \RestfulInterface::PUT => 'putEntity',
+        \RestfulInterface::PATCH => 'patchEntity',
+        \RestfulInterface::DELETE => 'deleteEntity',
+      ),
+    );
   }
 
   /**
@@ -268,8 +278,12 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       }
     }
     else {
-      // Sort by default using the entity ID.
-      $sorts['id'] = 'ASC';
+      // Some endpoints like 'token_auth' don't have an id public field. In that
+      // case, skip the default sorting.
+      if (!empty($public_fields['id'])) {
+        // Sort by default using the entity ID.
+        $sorts['id'] = 'ASC';
+      }
     }
 
     foreach ($sorts as $sort => $direction) {
@@ -294,6 +308,13 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
    * @see \RestfulEntityBase::getQueryForList
    */
   protected function queryForListFilter(\EntityFieldQuery $query) {
+    if (!$this->isListRequest()) {
+      // Not a list request, so we don't need to filter.
+      // We explicitly check this, as this function might be called from a
+      // formatter plugin, after RESTful's error handling has finished, and an
+      // invalid key might be passed.
+      return;
+    }
     $request = $this->getRequest();
     if (empty($request['filter'])) {
       // No filtering is needed.
@@ -559,7 +580,7 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       $value = NULL;
 
       if ($info['callback']) {
-        $value = static::executeCallback($info['callback'], array($value));
+        $value = static::executeCallback($info['callback'], array($wrapper));
       }
       else {
         // Exposing an entity field.
@@ -668,11 +689,11 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
   protected function getValueFromResource(EntityMetadataWrapper $wrapper, $property, $resource) {
     $handlers = &drupal_static(__FUNCTION__, array());
 
-    $target_type = $this->getTargetTypeFromEntityReference($property);
     if (!$entity = $wrapper->value()) {
       return;
     }
 
+    $target_type = $this->getTargetTypeFromEntityReference($property);
     list($id,, $bundle) = entity_extract_ids($target_type, $entity);
 
     if (empty($resource[$bundle])) {
@@ -680,10 +701,15 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
       return;
     }
 
+    if (!$resource[$bundle]['full_view']) {
+      // Show only the ID(s) of the referenced resource.
+      return $wrapper->value(array('identifier' => TRUE));
+    }
+
 
     if (empty($handlers[$bundle])) {
       $version = $this->getVersion();
-      $handlers[$bundle] = restful_get_restful_handler($resource[$bundle], $version['major'], $version['minor']);
+      $handlers[$bundle] = restful_get_restful_handler($resource[$bundle]['name'], $version['major'], $version['minor']);
     }
     $bundle_handler = $handlers[$bundle];
     return $bundle_handler->viewEntity($id);
@@ -959,7 +985,8 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     }
 
     // In case we have multiple bundles, we opt for the first one.
-    $resource_name = reset($public_fields[$public_field_name]['resource']);
+    $resource = reset($public_fields[$public_field_name]['resource']);
+    $resource_name = $resource['name'];
 
     $version = $this->getVersion();
     $handler = restful_get_restful_handler($resource_name, $version['major'], $version['minor']);
@@ -1335,6 +1362,16 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
           $info['column'] = key($field['columns']);
         }
       }
+
+      foreach ($info['resource'] as &$resource) {
+        // Expand array to be verbose.
+        if (!is_array($resource)) {
+          $resource = array('name' => $resource);
+        }
+
+        // Set default value.
+        $resource += array('full_view' => TRUE);
+      }
     }
 
     // Cache the processed fields.
@@ -1383,11 +1420,38 @@ abstract class RestfulEntityBase extends RestfulBase implements RestfulEntityInt
     if (empty($image_styles)) {
       return $file_array;
     }
+    // If $file_array is an array of file arrays. Then call recursively for each
+    // item and return the result.
+    if (static::isArrayNumeric($file_array)) {
+      $output = array();
+      foreach ($file_array as $item) {
+        $output[] = $this->getImageUris($item, $image_styles);
+      }
+      return $output;
+    }
     $file_array['image_styles'] = array();
     foreach ($image_styles as $style) {
       $file_array['image_styles'][$style] = image_style_url($style, $file_array['uri']);
     }
     return $file_array;
+  }
+
+  /**
+   * Helper method to determine if an array is numeric.
+   *
+   * @param array $input
+   *   The input array.
+   *
+   * @return boolean
+   *   TRUE if the array is numeric, false otherwise.
+   */
+  protected final static function isArrayNumeric(array $input) {
+    foreach (array_keys($input) as $key) {
+      if (!ctype_digit((string) $key)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
 }
